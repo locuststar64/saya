@@ -23,11 +23,11 @@ If using updateDiscourseUsers.pl, must have Perl with DBD::Pg as well.
  
 4. Setup web server to pass the the configuration file to the CGI programs.
 Use a different virtual host for improved security.
-> `<VirtualHost yoursite.com:80>
+```<VirtualHost yoursite.com:80>
    ...
    SetEnv SAYA_CONFIG /path-to-saya/saya.conf
    ...
-</VirtualHost>`
+</VirtualHost>```
 
 5. Setup the probe script in the web server document root. Consider naming it something else.
   cp log.pl to /path-to-document-root/log.pl
