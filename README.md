@@ -1,7 +1,9 @@
 # Saya
 
+>
 ## WARNING: Pre-Alpha
-Saya is a work in progress. It is not recommended that anyone use it.
+
+*Saya is a work in progress. It is not recommended that anyone use it.*
 
 ## Requirements
 
