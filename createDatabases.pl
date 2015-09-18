@@ -59,5 +59,12 @@ qq(create table saya_probes ( id INT, key INT, isactive INT, redirect VARCHAR(25
 $sayaDbh->do( qq(create index saya_key_index on saya_probes ( key );) )
   or die($DBI::errstr);
 
+$sayaDbh->do( qq(create table saya_version ( major INT, minor INT );) )
+  or die($DBI::errstr);
+
+$sayaDbh->do( qq(insert into saya_version (major, minor) values ( 0, 1 );) )
+  or die($DBI::errstr);
+
+
 $sayaDbh->disconnect();
 
