@@ -1,0 +1,22 @@
+{
+# Max number of days to retain a user's IP address.
+  maxUserIPAge => 90,
+
+# Max number of days to retain log entries.
+  maxLogAge => 180,
+
+# Rediect point for invalid HTTP requests
+  notFoundUrl => "http://www.lostinspace.com/404.html",
+
+# Database connection information for Saya data
+  sayaDSN => "dbi:SQLite:dbname=/home/saya/data.db",
+  sayaUser => "",
+  sayaPass => "",
+
+# Optional: Used by updateDiscourseUsers.pl
+# Database connection information for the user's forum (read-only)
+  forumDSN => "dbi:Pg:dbname=discourse;host=127.0.0.1;port=1999",
+  forumUser => "saya",
+  forumPass => "password"
+
+}
