@@ -25,13 +25,13 @@ use strict;
 use DBI;
 use Getopt::Long;
 
-my $id            = 0;
+my $key           = 0;
 my $isactive      = 1;
 my $redirect      = "";
 my $host_override = "";
 my $note          = "";
 my $optsok        = GetOptions(
-    "id=s"       => \$id,
+    "key=s"      => \$key,
     "active=i"   => \$isactive,
     "redirect=s" => \$redirect,
     "host=s"     => \$host_override,
@@ -42,7 +42,7 @@ if ( !$optsok or !$redirect ) {
     print <<EOF;
  Usage:
    --redirect=http://a.com/i.png     Url to redirect users to (REQUIRED)
-   --id=128ABCD                      Probe number in hexdeceimal, generated if missing
+   --key=128ABCD                     Probe key in hexdeceimal, generated if missing
    --active=1                        Is the probe active, 0 or 1?  (default $isactive)
    --host=foo.com                    Host name override for hits (default "")
    --note="for bob"                  Text note about probe (default "")
@@ -63,37 +63,47 @@ my $sayaDbh = DBI->connect(
 ) or die $DBI::errstr;
 
 sub saya_probeExists {
-    my $probe = shift;
-    return 0 if ( !$probe );
-    my $sth = $sayaDbh->prepare(qq(select 1 from saya_probes where id=?;));
-    $sth->execute($probe);
+    my $key = shift;
+    return 0 if ( !$key );
+    my $sth = $sayaDbh->prepare(qq(select 1 from saya_probes where key=?;));
+    $sth->execute($key);
     my $rtn = $sth->fetchrow_arrayref() ? 1 : 0;
     $sth->finish();
     return $rtn;
 }
 
 $isactive = $isactive ? 1 : 0;
-$id = hex($id) if ($id);
-if ($id) {
-    if ( saya_probeExists($id) ) {
-        printf( "Error: Probe %X already exists.\n", $id );
+
+# Generate the key
+$key = hex($key) if ($key);
+if ($key) {
+    if ( saya_probeExists($key) ) {
+        printf( "Error: Probe %X already exists.\n", $key );
         exit(1);
     }
 }
 else {
     do {
-        $id = int( rand( time() ) * 1000 );
-    } while ( saya_probeExists($id) );
+        $key = int( rand( time() ) * 1000 );
+    } while ( saya_probeExists($key) );
 }
 
-my $sth = $sayaDbh->prepare(
-qq(insert into saya_probes (id, isactive, redirect, host_override, note) values (?,?,?,?,?);)
+# Generate the id
+my $sth = $sayaDbh->prepare(qq(select max(id) from saya_probes;));
+$sth->execute();
+my $probe_id = 1;
+my $row      = $sth->fetchrow_arrayref();
+$probe_id = @$row[0] + 1 if ($row);
+$sth->finish();
+
+$sth = $sayaDbh->prepare(
+qq(insert into saya_probes (id, key, isactive, redirect, host_override, note) values (?,?,?,?,?,?);)
 );
-$sth->execute( $id, $isactive, $redirect, $host_override, $note )
+$sth->execute( $probe_id, $key, $isactive, $redirect, $host_override, $note )
   or die($DBI::errstr);
 $sth->finish();
 
-printf( "%X\n", $id );
+printf( "%X\n", $key );
 
 $sayaDbh->disconnect();
 

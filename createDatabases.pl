@@ -53,8 +53,11 @@ $sayaDbh->do(
   or die($DBI::errstr);
 
 $sayaDbh->do(
-qq(create table saya_probes ( id INT, isactive INT, redirect VARCHAR(256), host_override VARCHAR(128), note VARCHAR(256), PRIMARY KEY (id) );)
+qq(create table saya_probes ( id INT, key INT, isactive INT, redirect VARCHAR(256), host_override VARCHAR(128), note VARCHAR(256), PRIMARY KEY (id) );)
 ) or die($DBI::errstr);
+
+$sayaDbh->do( qq(create index saya_key_index on saya_probes ( key );) )
+  or die($DBI::errstr);
 
 $sayaDbh->disconnect();
 

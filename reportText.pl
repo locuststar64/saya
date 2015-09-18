@@ -48,12 +48,12 @@ $sth->execute();
 
 while ( $row = $sth->fetchrow_arrayref() ) {
     printf( "USER: %s (%s)\n\n", @$row[1], @$row[0] );
-    printf( "  %-15s %-10s %4s %-16s %-28s %s\n",
+    printf( "  %-15s %-10s %4s %-8s %-28s %s\n",
         "IP", "DATE", "HITS", "PROBE", "HOST", "REFERER" );
     my $row2;
     $sth2->execute( @$row[0] );
     while ( $row2 = $sth2->fetchrow_arrayref() ) {
-        printf( "  %-15s %-10s %4s %-16X %-28s %s\n",
+        printf( "  %-15s %-10s %4s %-8d %-28s %s\n",
             @$row2[4], @$row2[2], @$row2[3], @$row2[5], @$row2[0], @$row2[1] );
     }
     printf("\n\n");

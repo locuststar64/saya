@@ -57,7 +57,7 @@ sub saya_getProbe {
     my $probe = shift;
     return undef if ( !defined($probe) );
     my $sth = $sayaDbh->prepare(
-qq(select redirect, isactive, host_override from saya_probes where id=?;)
+qq(select id, redirect, isactive, host_override from saya_probes where key=?;)
     );
     $sth->execute($probe);
     my $row = $sth->fetchrow_arrayref();
@@ -65,10 +65,10 @@ qq(select redirect, isactive, host_override from saya_probes where id=?;)
       ( !$row )
       ? undef
       : {
-        id            => $probe,
-        redirect      => @$row[0],
-        isactive      => @$row[1],
-        host_override => @$row[2]
+        id            => @$row[0],
+        redirect      => @$row[1],
+        isactive      => @$row[2],
+        host_override => @$row[3]
       };
     $sth->finish();
     return $rtn;
