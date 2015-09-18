@@ -1,4 +1,4 @@
-# Saya - Anti-Spy for Guilds 
+# Saya
 
 ## WARNING: Pre-Alpha
 Saya is a work in progress. It is not recommended that anyone use it.
