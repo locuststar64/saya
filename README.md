@@ -4,10 +4,13 @@
 Saya is a work in progress. It is not recommended that anyone use it.
 
 ## Requirements
-Perl with DBD::SQLite installed.
 
-If using updateDiscourseUsers.pl, must have Perl with DBD::Pg as well.
-> sudo yum install perl-DBD-Pg
+- Perl with DBD::SQLite installed.
+
+- If using updateDiscourseUsers.pl, must have Perl with DBD::Pg as well.
+```
+sudo yum install perl-DBD-Pg
+```
 
 ## Installation
 
