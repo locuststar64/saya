@@ -23,7 +23,6 @@
 
 use strict;
 use DBI;
-use POSIX qw/strftime/;
 
 my $configfile = exists $ENV{"SAYA_CONFIG"} ? $ENV{"SAYA_CONFIG"} : "saya.conf";
 my $config = do($configfile);
@@ -40,13 +39,8 @@ my $sayaDbh = DBI->connect(
 sub redirect {
     my $status = shift;
     my $url    = shift;
-    my $now    = time;
-    my $date   = strftime( '%a, %d %b %Y %H:%M:%S GMT', gmtime($now) );
-
-    my $expires =
-      strftime( '%a, %d %b %Y %H:%M:%S GMT', gmtime( $now + 10800 ) );
     print
-"Status: $status Moved\r\nLocation: $url\r\nDate: $date\r\nExpires: $date\r\nContent-type: text/plain\r\nContent-length: 0\r\n\r\n";
+"Status: $status Moved\r\nLocation: $url\r\nCache-control: private, max-age=10800, s-maxage=0\r\nContent-type: text/plain\r\nContent-length: 0\r\n\r\n";
 }
 
 sub saya_isValidHost {
