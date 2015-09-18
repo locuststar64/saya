@@ -30,6 +30,7 @@ Use a different virtual host for improved security.
        ...
     </VirtualHost>
 ```
+
 5. Setup the probe script in the web server document root. Consider naming it something else.
   cp log.pl to /path-to-document-root/log.pl
 
