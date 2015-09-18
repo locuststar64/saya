@@ -14,13 +14,17 @@ If using updateDiscourseUsers.pl, must have Perl with DBD::Pg as well.
 - Put Saya somewhere not exposed by the web server.
 
 - Update the configuration. 
+```
  cp saya.conf.example  saya.conf
  vi saya.conf
+```
 
 - Setup the database and fix database permissions.
+```
  ./createDatabase.pl
  chmod 666 data.db
- 
+```
+
 - Setup web server to pass the the configuration file to the CGI programs.
 Use a different virtual host for improved security.
 ```
@@ -32,11 +36,14 @@ Use a different virtual host for improved security.
 ```
 
 - Setup the probe script in the web server document root. Consider naming it something else.
+```
   cp log.pl to /path-to-document-root/log.pl
+```
 
 - Setup automation
 Automation includes updating the suspects table and also updating the list of known users.
 You may have to populate the saya_users table for your own forum in your own way.  All Saya needs to know the last IP address of each user so it can corralate the data.
+
 It is best to populate the saya_users table periodically to keep up with changing user IP addresses.
 Add the following **crontab** for Discourse forum Users:
 ```
