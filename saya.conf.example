@@ -17,6 +17,9 @@
 # Database connection information for the user's forum (read-only)
   forumDSN => "dbi:Pg:dbname=discourse;host=127.0.0.1;port=1999",
   forumUser => "saya",
-  forumPass => "password"
+  forumPass => "password",
+
+# Optional: Used by makeUrls.pl
+  logURL => "http://yoursite.com/log.pl"
 
 }
