@@ -24,10 +24,11 @@ sudo yum install perl-DBD-Pg
  vi saya.conf
 ```
 
-- Setup the database and fix database permissions.
+- Setup the database and fix database permissions.  Put the database in a seperate directory somewhere.  The directory and the database muse be writeable by you and the web server.  The location of the database was specified in saya.conf.
 ```
  ./createDatabase.pl
- chmod 666 data.db
+ chmod 777 /path-to-database
+ chmod 666 /path-to-database/data.db
 ```
 
 - Setup web server to pass the the configuration file to the CGI programs.
