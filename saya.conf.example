@@ -9,7 +9,7 @@
   notFoundUrl => "http://www.lostinspace.com/404.html",
 
 # Database connection information for Saya data
-  sayaDSN => "dbi:SQLite:dbname=/home/saya/data.db",
+  sayaDSN => "dbi:SQLite:dbname=/home/saya/data/data.db",
   sayaUser => "",
   sayaPass => "",
 
