@@ -37,7 +37,7 @@ my $sayaDbh = DBI->connect(
 ) or die $DBI::errstr;
 
 $sayaDbh->do(
-qq(create table saya_log ( ip VARCHAR(15), host VARCHAR(128), referer VARCHAR(256), last DATE, hits INT, probe INT, PRIMARY KEY (ip, host) );)
+qq(create table saya_log ( ip VARCHAR(15), host VARCHAR(128), referer VARCHAR(256), last DATE, hits INT, probe INT, PRIMARY KEY (ip, host, probe) );)
 ) or die($DBI::errstr);
 
 $sayaDbh->do(

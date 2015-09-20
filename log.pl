@@ -82,9 +82,9 @@ sub saya_addLogEntry {
     return if ( !$host || !$ip || !$ref || !$probeInfo );
     $host = $$probeInfo{"host_override"} if ( $$probeInfo{"host_override"} );
     my $updatesql =
-qq(update saya_log set probe=?, last=date(), hits=hits+1, referer=? where ip=? and host=?;);
+qq(update saya_log set last=date(), hits=hits+1, referer=? where ip=? and host=? and probe=?;);
     my $rv =
-      $sayaDbh->do( $updatesql, undef, $$probeInfo{"id"}, $ref, $ip, $host );
+      $sayaDbh->do( $updatesql, undef, $ref, $ip, $host, $$probeInfo{"id"} );
 
     if ( $rv < 0 ) {
         print $DBI::errstr;
