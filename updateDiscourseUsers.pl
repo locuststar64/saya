@@ -58,6 +58,24 @@ qq(insert into saya_users (userid, ip,user,last) values (?,?,?,date()););
     }
 }
 
+sub saya_addUserHistoryEntry {
+    my $userid   = "" . shift;
+    my $ip       = shift;
+    my $username = shift;
+    my $updatesql =
+      qq(update saya_user_history set last=date(), user=? where ip=? and userid=?;);
+    my $rv = $sayaDbh->do( $updatesql, undef, $username, $ip , $userid);
+    if ( $rv < 0 ) {
+        print $DBI::errstr;
+    }
+    elsif ( $rv == 0 ) {
+        my $insertsql =
+qq(insert into saya_user_history (userid, ip,user,last) values (?,?,?,date()););
+        $sayaDbh->do( $insertsql, undef, $userid, $ip, $username );
+    }
+}
+
+
 sub saya_clearOldUserEntries {
     my $maxAge = $$config{"maxUserIPAge"};
     $sayaDbh->do(
@@ -74,6 +92,7 @@ qq(select id, username, ip_address from users where not ip_address is null and (
     $sth->execute();
     while ( $row = $sth->fetchrow_arrayref() ) {
         saya_addUserEntry( @$row[0], @$row[2], @$row[1] );
+        saya_addUserHistoryEntry( @$row[0], @$row[2], @$row[1] );
     }
     $sth->finish();
 }

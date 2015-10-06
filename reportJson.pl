@@ -41,7 +41,7 @@ my @suspects = ();
 my $sql =
 qq(select distinct saya_users.userid, saya_users.user from saya_users inner join saya_suspects on saya_users.ip = saya_suspects.ip;);
 my $sql2 =
-qq(select saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,saya_log.ip,saya_log.probe from saya_log inner join saya_users on saya_users.ip = saya_log.ip where saya_users.userid=?;);
+qq(select distinct saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,saya_log.ip,saya_log.probe from saya_log inner join saya_users on saya_users.ip = saya_log.ip where saya_users.userid=?;);
 my $row;
 my $sth  = $sayaDbh->prepare($sql);
 my $sth2 = $sayaDbh->prepare($sql2);

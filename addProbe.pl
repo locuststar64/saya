@@ -29,12 +29,14 @@ my $key           = 0;
 my $isactive      = 1;
 my $redirect      = "";
 my $host_override = "";
+my $creator       = "";
 my $note          = "";
 my $optsok        = GetOptions(
     "key=s"      => \$key,
     "active=i"   => \$isactive,
     "redirect=s" => \$redirect,
     "host=s"     => \$host_override,
+    "creator=s"  => \$creator,
     "note=s"     => \$note
 );
 
@@ -45,6 +47,7 @@ if ( !$optsok or !$redirect ) {
    --key=128ABCD                     Probe key in hexdeceimal, generated if missing
    --active=1                        Is the probe active, 0 or 1?  (default $isactive)
    --host=foo.com                    Host name override for hits (default "")
+   --creator="bob"                   User name of the creator (default "")
    --note="for bob"                  Text note about probe (default "")
 EOF
     exit(1);
@@ -97,9 +100,9 @@ $probe_id = @$row[0] + 1 if ($row);
 $sth->finish();
 
 $sth = $sayaDbh->prepare(
-qq(insert into saya_probes (id, key, isactive, redirect, host_override, note) values (?,?,?,?,?,?);)
+qq(insert into saya_probes (id, key, isactive, redirect, host_override, creator, note) values (?,?,?,?,?,?,?);)
 );
-$sth->execute( $probe_id, $key, $isactive, $redirect, $host_override, $note )
+$sth->execute( $probe_id, $key, $isactive, $redirect, $host_override, $creator, $note )
   or die($DBI::errstr);
 $sth->finish();
 

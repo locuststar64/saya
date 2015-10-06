@@ -37,11 +37,11 @@ my $sayaDbh = DBI->connect(
 ) or die $DBI::errstr;
 
 $sayaDbh->do(
-qq(create table saya_log ( ip VARCHAR(15), host VARCHAR(128), referer VARCHAR(256), last DATE, hits INT, probe INT, PRIMARY KEY (ip, host, probe) );)
+qq(create table saya_log ( ip VARCHAR(15), host VARCHAR(128), referer VARCHAR(256), last INT, hits INT, probe INT, PRIMARY KEY (ip, host, probe) );)
 ) or die($DBI::errstr);
 
 $sayaDbh->do(
-qq(create table saya_users ( ip VARCHAR(15), userid VARCHAR(64), user VARCHAR(128), last DATE, PRIMARY KEY (ip) );)
+qq(create table saya_users ( ip VARCHAR(15), userid VARCHAR(64), user VARCHAR(128), last INT, PRIMARY KEY (ip, userid) );)
 ) or die($DBI::errstr);
 
 $sayaDbh->do(
@@ -53,7 +53,7 @@ $sayaDbh->do(
   or die($DBI::errstr);
 
 $sayaDbh->do(
-qq(create table saya_probes ( id INT, key INT, isactive INT, redirect VARCHAR(256), host_override VARCHAR(128), note VARCHAR(256), PRIMARY KEY (id) );)
+qq(create table saya_probes ( id INT, key INT, isactive INT, redirect VARCHAR(256), host_override VARCHAR(128), note VARCHAR(256), creator VARCHAR(64), PRIMARY KEY (id) );)
 ) or die($DBI::errstr);
 
 $sayaDbh->do( qq(create index saya_key_index on saya_probes ( key );) )
