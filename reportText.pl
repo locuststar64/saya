@@ -61,4 +61,24 @@ while ( $row = $sth->fetchrow_arrayref() ) {
 }
 $sth->finish();
 
+# Report on duplicate IP usage
+$sql  = qq(select ip from saya_users group by ip having count(*) > 1;);
+$sql2 = qq(select userid, user, last from saya_users where ip=?;);
+$sth  = $sayaDbh->prepare($sql);
+$sth2 = $sayaDbh->prepare($sql2);
+$sth->execute();
+
+while ( $row = $sth->fetchrow_arrayref() ) {
+    printf( "SHARED IP: %s\n\n", @$row[0] );
+    printf( "  %-15s %-10s %s\n", "DATE", "USERID", "USER" );
+    my $row2;
+    $sth2->execute( @$row[0] );
+    while ( $row2 = $sth2->fetchrow_arrayref() ) {
+        printf( "  %-15s %-10s %s\n", @$row2[2], @$row2[0], @$row2[1] );
+    }
+    printf("\n\n");
+    $sth2->finish();
+}
+$sth->finish();
+
 $sayaDbh->disconnect();

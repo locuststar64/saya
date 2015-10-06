@@ -76,7 +76,47 @@ while ( $row = $sth->fetchrow_arrayref() ) {
 }
 $sth->finish();
 
-my $json = encode_json( \@suspects );
+# Report on duplicate IP usage
+my @dups = ();
+$sql  = qq(select ip from saya_users group by ip having count(*) > 1;);
+$sql2 = qq(select userid, user, last from saya_users where ip=?;);
+$sth  = $sayaDbh->prepare($sql);
+$sth2 = $sayaDbh->prepare($sql2);
+$sth->execute();
+
+while ( $row = $sth->fetchrow_arrayref() ) {
+    printf( "SHARED IP: %s\n\n", @$row[0] );
+    printf( "  %-15s %-10s %s\n", "DATE", "USERID", "USER" );
+    my $row2;
+    my @list = ();
+    $sth2->execute( @$row[0] );
+    while ( $row2 = $sth2->fetchrow_arrayref() ) {
+        push(
+            @list,
+            {
+                last   => @$row2[2],
+                userid => @$row2[0],
+                user   => @$row2[1]
+            }
+        );
+    }
+    push(
+        @dups,
+        {
+            ip    => @$row[0],
+            users => \@list
+        }
+    );
+    $sth2->finish();
+}
+$sth->finish();
+
+my $data = {
+    suspects => \@suspects,
+    dupips   => \@dups
+};
+
+my $json = encode_json($data);
 $sayaDbh->disconnect();
 
 print "$json\n";
