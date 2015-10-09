@@ -22,63 +22,54 @@
 # SOFTWARE.
 
 use strict;
-use DBI;
+use warnings;
+
+my $config;
+
+BEGIN {
+    my $configfile =
+      exists $ENV{"SAYA_CONFIG"} ? $ENV{"SAYA_CONFIG"} : "saya.conf";
+    $config = do($configfile);
+    if ( !$config ) {
+        print("Could not load configuration from '$configfile'. $!\n");
+        exit(1);
+    }
+    unshift( @INC, $$config{"sayaPath"} . "/lib" );
+}
+
+use Saya;
 use JSON qw/encode_json/;
 
-my $configfile = exists $ENV{"SAYA_CONFIG"} ? $ENV{"SAYA_CONFIG"} : "saya.conf";
-my $config = do($configfile);
-if ( !$config ) {
-    print("Could not load configuration from '$configfile'. $!\n");
-    exit(1);
-}
+my $saya = Saya->new($config);
+die $_ if ( $saya->connect() );
+my $suspects  = $saya->getSuspects();
+my $sharedIPs = $saya->getSharedIPs();
+$saya->disconnect();
 
-my $sayaDbh = DBI->connect(
-    $$config{"sayaDSN"}, $$config{"sayaUser"},
-    $$config{"sayaPass"}, { RaiseError => 1 }
-) or die $DBI::errstr;
-
-my $sql =
-qq(select distinct saya_users.userid, saya_users.user from saya_users inner join saya_suspects on saya_users.ip = saya_suspects.ip;);
-my $sql2 =
-qq(select distinct saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,saya_log.ip,saya_log.probe from saya_log inner join saya_users on saya_users.ip = saya_log.ip where saya_users.userid=?;);
-my $row;
-my $sth  = $sayaDbh->prepare($sql);
-my $sth2 = $sayaDbh->prepare($sql2);
-$sth->execute();
-
-while ( $row = $sth->fetchrow_arrayref() ) {
-    printf( "USER: %s (%s)\n\n", @$row[1], @$row[0] );
+my $user;
+my $log;
+foreach $user (@$suspects) {
+    printf( "USER: %s (%s)\n\n", $$user{"user"}, $$user{"userid"} );
     printf( "  %-15s %-19s %-4s %-5s %-28s %s\n",
         "IP", "DATE", "HITS", "PROBE", "HOST", "REFERER" );
-    my $row2;
-    $sth2->execute( @$row[0] );
-    while ( $row2 = $sth2->fetchrow_arrayref() ) {
-        printf( "  %-15s %-19s %-4s %-5d %-28s %s\n",
-            @$row2[4], @$row2[2], @$row2[3], @$row2[5], @$row2[0], @$row2[1] );
+    foreach $log ( @{ $$user{"log"} } ) {
+        printf(
+            "  %-15s %-19s %-4s %-5d %-28s %s\n",
+            $$log{"ip"},    $$log{"last"}, $$log{"hits"},
+            $$log{"probe"}, $$log{"host"}, $$log{"referer"}
+        );
     }
     printf("\n\n");
-    $sth2->finish();
 }
-$sth->finish();
 
-# Report on duplicate IP usage
-$sql  = qq(select ip from saya_users group by ip having count(*) > 1;);
-$sql2 = qq(select userid, user, last from saya_users where ip=?;);
-$sth  = $sayaDbh->prepare($sql);
-$sth2 = $sayaDbh->prepare($sql2);
-$sth->execute();
-
-while ( $row = $sth->fetchrow_arrayref() ) {
-    printf( "SHARED IP: %s\n\n", @$row[0] );
+my $ip;
+foreach $ip (@$sharedIPs) {
+    printf( "SHARED IP: %s\n\n", $$ip{"ip"} );
     printf( "  %-15s %-10s %s\n", "DATE", "USERID", "USER" );
-    my $row2;
-    $sth2->execute( @$row[0] );
-    while ( $row2 = $sth2->fetchrow_arrayref() ) {
-        printf( "  %-15s %-10s %s\n", @$row2[2], @$row2[0], @$row2[1] );
+    foreach $user ( @{ $$ip{"users"} } ) {
+        printf( "  %-15s %-10s %s\n",
+            $$user{"last"}, $$user{"userid"}, $$user{"user"} );
     }
     printf("\n\n");
-    $sth2->finish();
 }
-$sth->finish();
 
-$sayaDbh->disconnect();

@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+use Getopt::Long;
 use strict;
 use warnings;
 
@@ -39,43 +40,45 @@ BEGIN {
 
 use Saya;
 
-sub redirect {
-    my $status = shift;
-    my $url    = shift;
-    print
-"Status: $status Moved\r\nLocation: $url\r\nCache-control: private, max-age=10800, s-maxage=0\r\nContent-type: text/plain\r\nContent-length: 0\r\n\r\n";
-}
-
-sub defaultExit {
-    redirect( 301, $$config{"notFoundUrl"} );
-    exit(0);
-}
-
-defaultExit() if ( !exists $ENV{'PATH_INFO'} );
-
-my ($probe) = $ENV{'PATH_INFO'} =~ m#^/([0-9A-F]+)#;
-defaultExit() if ( !$probe );
-
 my $saya = Saya->new($config);
-defaultExit() if ( $saya->connect() );
+die $_ if ( $saya->connect() );
 
-my $probeInfo = $saya->getProbe( $saya->fromHex($probe) );
-defaultExit() if ( !$probeInfo );
+my $probe    = undef;
+my $filename = "";
+my $tiny     = "";
+my $optsok   = GetOptions(
+    "probe=s"    => \$probe,
+    "filename=s" => \$filename,
+    "tiny"       => \$tiny
+);
 
-redirect( 302, $$probeInfo{"redirect"} );
-exit(0) if ( $$probeInfo{"isactive"} == 0 );
+if ( !$optsok or !defined($probe) ) {
+    print <<EOF;
+ Usage:
+   --probe=12                        Probe id REQUIRED
+   --filename=my.png                 File extension (default "")
+   --tiny                            Create a tiny URL
+EOF
+    exit(1);
+}
 
-my $ref = $ENV{'HTTP_REFERER'};
+my $url;
+my $err;
 
-my $ip = $ENV{'REMOTE_HOST'};
-$ip = $ENV{'HTTP_X_REAL_IP'} if ( !$ip );
-
-exit(0) if ( !$ref || !$ip );
-
-my ($host) = $ref =~ m!https?://([^:/]+)!;
-exit(0) if ( $saya->isValidHost($host) == 0 );
-
-$host = $$probeInfo{"host_override"} if ( $$probeInfo{"host_override"} );
-$saya->addLogEntry( $ip, $host, $ref, $$probeInfo{"id"} );
+if ($tiny) {
+    ( $url, $err ) = $saya->getTinyUrl( $probe, $filename );
+}
+else {
+    ( $url, $err ) = $saya->getProbeUrl( $probe, $filename );
+}
 
 $saya->disconnect();
+
+if ( !$url ) {
+    print "$err\n" if ($err);
+    print "Unknown error\n" if ( !$err );
+    exit(1);
+}
+
+print "$url\n";
+

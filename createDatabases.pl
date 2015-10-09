@@ -53,6 +53,10 @@ $sayaDbh->do(
   or die($DBI::errstr);
 
 $sayaDbh->do(
+    qq(create table saya_ipinfo ( ip VARCHAR(15), hostname VARCHAR(128), loc VARCHAR(128), org VARCHAR(128), city VARCHAR(128), region VARCHAR(128), country VARCHAR(128), postal VARCHAR(128), phone VARCHAR(128), created INT, PRIMARY KEY (ip) );)
+  or die($DBI::errstr);
+
+$sayaDbh->do(
 qq(create table saya_probes ( id INT, key INT, isactive INT, redirect VARCHAR(256), host_override VARCHAR(128), note VARCHAR(256), creator VARCHAR(64), PRIMARY KEY (id) );)
 ) or die($DBI::errstr);
 

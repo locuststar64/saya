@@ -79,13 +79,11 @@ my $http    = HTTP::Tiny->new();
 my $tinyURL = "http://tinyurl.com/api-create.php?"
   . $http->www_form_urlencode( { "url" => $mainURL } );
 my $response = $http->get($tinyURL);
-
 if ( !$$response{"success"} || !$$response{"content"} ) {
     print "Tinyurl.com request failed: "
       . $$response{"reason"}
       . "\n  $tinyURL\n";
     exit(1);
 }
-
 print $$response{"content"} . $filename . "\n";
 

@@ -38,44 +38,22 @@ BEGIN {
 }
 
 use Saya;
-
-sub redirect {
-    my $status = shift;
-    my $url    = shift;
-    print
-"Status: $status Moved\r\nLocation: $url\r\nCache-control: private, max-age=10800, s-maxage=0\r\nContent-type: text/plain\r\nContent-length: 0\r\n\r\n";
-}
-
-sub defaultExit {
-    redirect( 301, $$config{"notFoundUrl"} );
-    exit(0);
-}
-
-defaultExit() if ( !exists $ENV{'PATH_INFO'} );
-
-my ($probe) = $ENV{'PATH_INFO'} =~ m#^/([0-9A-F]+)#;
-defaultExit() if ( !$probe );
+use JSON qw/encode_json/;
 
 my $saya = Saya->new($config);
-defaultExit() if ( $saya->connect() );
-
-my $probeInfo = $saya->getProbe( $saya->fromHex($probe) );
-defaultExit() if ( !$probeInfo );
-
-redirect( 302, $$probeInfo{"redirect"} );
-exit(0) if ( $$probeInfo{"isactive"} == 0 );
-
-my $ref = $ENV{'HTTP_REFERER'};
-
-my $ip = $ENV{'REMOTE_HOST'};
-$ip = $ENV{'HTTP_X_REAL_IP'} if ( !$ip );
-
-exit(0) if ( !$ref || !$ip );
-
-my ($host) = $ref =~ m!https?://([^:/]+)!;
-exit(0) if ( $saya->isValidHost($host) == 0 );
-
-$host = $$probeInfo{"host_override"} if ( $$probeInfo{"host_override"} );
-$saya->addLogEntry( $ip, $host, $ref, $$probeInfo{"id"} );
-
+die $_ if ( $saya->connect() );
+my $suspects  = $saya->getSuspects();
+my $sharedIPs = $saya->getSharedIPs();
 $saya->disconnect();
+
+my $data = {
+    suspects => $suspects,
+    dupips   => $sharedIPs
+};
+
+my $json = encode_json($data);
+
+print "Content-type: application/json\r\n";
+print "Content-Length: " . length($json) . "\r\n";
+print "\r\n";
+print "$json\n";

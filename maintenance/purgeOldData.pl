@@ -22,28 +22,26 @@
 # SOFTWARE.
 
 use strict;
-use DBI;
+use warnings;
 
-my $configfile = exists $ENV{"SAYA_CONFIG"} ? $ENV{"SAYA_CONFIG"} : "saya.conf";
-my $config = do($configfile);
-if ( !$config ) {
-    print("Could not load configuration from '$configfile'. $!\n");
-    exit(1);
+my $config;
+
+BEGIN {
+    my $configfile =
+      exists $ENV{"SAYA_CONFIG"} ? $ENV{"SAYA_CONFIG"} : "saya.conf";
+    $config = do($configfile);
+    if ( !$config ) {
+        print("Could not load configuration from '$configfile'. $!\n");
+        exit(1);
+    }
+    unshift( @INC, $$config{"sayaPath"} . "/lib" );
 }
 
-my $sayaDbh = DBI->connect(
-    $$config{"sayaDSN"}, $$config{"sayaUser"},
-    $$config{"sayaPass"}, { RaiseError => 1 }
-) or die $DBI::errstr;
+use Saya;
 
-$sayaDbh->do(
-qq(delete from saya_log where last < date('now','-$$config{maxLogAge} Age day');)
-);
+my $saya = Saya->new($config);
+die $_ if ( $saya->connect() );
 
-$sayaDbh->do(qq(delete from saya_suspects;));
+$saya->purgeOldData();
 
-$sayaDbh->do(
-qq(insert into saya_suspects select distinct saya_users.ip from saya_users inner join saya_log on saya_users.ip = saya_log.ip;)
-);
-
-$sayaDbh->disconnect();
+$saya->disconnect();

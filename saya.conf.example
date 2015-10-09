@@ -5,8 +5,14 @@
 # Max number of days to retain log entries.
   maxLogAge => 180,
 
+# Max number of days to retain IPInfo entries.
+  maxIPInfoAge => 365,
+
 # Rediect point for invalid HTTP requests
   notFoundUrl => "http://www.lostinspace.com/404.html",
+
+# This directory where saya was installed
+  sayaPath => "/opt/saya",
 
 # Database connection information for Saya data
   sayaDSN => "dbi:SQLite:dbname=/home/saya/data/data.db",

@@ -1,5 +1,8 @@
 *.db
 *.log
 *.conf
+*.i
 data
-public_html
+public_html/*
+!public_html/saya/
+.htaccess
