@@ -451,7 +451,7 @@ sub fromHex {
 
 # Returns the log URL associated with a probe.
 #
-# @param probeId = the probde id
+# @param probeId = the probe id
 # @param filename - optional filename to place at the end of the url.
 # @return the url or undef if probe not found.
 sub getProbeUrl {
@@ -490,3 +490,58 @@ sub getTinyUrl {
     return $$response{"content"} . $filename;
 }
 
+# Returns if a probe key exist.
+#
+# @param key - the probe key
+# @return 1 if exists, 0 otherwise
+sub probeKeyExists {
+    my $self = shift;
+    my $key  = shift;
+    return 0 if ( !$key );
+    my $sth =
+      $$self{"_dbh"}->prepare(qq(select 1 from saya_probes where key=?;));
+    $sth->execute($key);
+    my $rtn = $sth->fetchrow_arrayref() ? 1 : 0;
+    $sth->finish();
+    return $rtn;
+}
+
+# Returns the new probe id for a destination url.
+#
+# @param redirect - the url to generate a probe for
+# @param creator - (optional) name of the user who is creating the probe.
+# @param note - (optional) note
+# @param host_override - (optional) hostname to use
+# @return the (probe id, key) or (0, error message)  if failed
+sub addProbe {
+    my $self          = shift;
+    my $redirect      = shift;
+    my $creator       = shift;
+    my $note          = shift;
+    my $host_override = shift;
+    my $key;
+
+    #generate the probe key
+    do {
+        $key = int( rand( time() ) * 1000 );
+    } while ( $self->probeKeyExists($key) );
+
+    # Generate the id
+    my $sth = $$self{"_dbh"}->prepare(qq(select max(id) from saya_probes;));
+    $sth->execute();
+    my $id  = 1;
+    my $row = $sth->fetchrow_arrayref();
+    $id = @$row[0] + 1 if ($row);
+    $sth->finish();
+
+    $sth =
+      $$self{"_dbh"}->prepare(
+qq(insert into saya_probes (id, key, isactive, redirect, host_override, creator, note) values (?,?,1,?,?,?,?);)
+      );
+    $sth->execute( $id, $key, $redirect, $host_override, $creator, $note )
+      or return ( 0, $DBI::errstr );
+    $sth->finish();
+
+    return ( $id, $key );
+
+}

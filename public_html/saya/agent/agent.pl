@@ -21,7 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-use Getopt::Long;
 use strict;
 use warnings;
 
@@ -39,46 +38,52 @@ BEGIN {
 }
 
 use Saya;
+use URL::Encode qw/url_params_mixed/;
+
+print "Content-type: application/json\r\n\r\n";
 
 my $saya = Saya->new($config);
-die $_ if ( $saya->connect() );
-
-my $probe    = undef;
-my $filename = "";
-my $tiny     = "";
-my $optsok   = GetOptions(
-    "probe=s"    => \$probe,
-    "filename=s" => \$filename,
-    "tiny"       => \$tiny
-);
-
-if ( !$optsok or !defined($probe) ) {
-    print <<EOF;
- Usage:
-   --probe=12                        Probe id REQUIRED
-   --filename=my.png                 File extension (default "")
-   --tiny                            Create a tiny URL
-EOF
-    exit(1);
+if ( $saya->connect() ) {
+    print '{"error":"Could not connect to database."}';
+    exit(0);
 }
+
+if ( !exists $ENV{'QUERY_STRING'} ) {
+    print '{"error":"no query"}';
+    $saya->disconnect();
+    exit(0);
+}
+
+my $note    = "";
+my $creator = "";
+if ( exists $ENV{'REMOTE_USER'} ) {
+    $creator = $ENV{'REMOTE_USER'};
+}
+
+my $params = url_params_mixed( $ENV{'QUERY_STRING'} );
+
+if ( !exists $$params{"url"} or !$$params{"url"} ) {
+    print '{"error":"no url query parameter"}';
+    $saya->disconnect();
+    exit(0);
+}
+
+my ( $probe, $key ) = $saya->addProbe( $$params{"url"}, $creator, $note );
 
 my $url;
 my $err;
 
-if ($tiny) {
-    ( $url, $err ) = $saya->getTinyUrl( $saya->getProbeUrl($probe), $filename );
-}
-else {
-    ( $url, $err ) = $saya->getProbeUrl( $probe, $filename );
-}
+( $url, $err ) =
+  $saya->getTinyUrl( $saya->getProbeUrl($probe), $$params{"file"} );
 
 $saya->disconnect();
 
 if ( !$url ) {
-    print "$err\n" if ($err);
-    print "Unknown error\n" if ( !$err );
-    exit(1);
+    print "{\"error\":\"$err\"}" if ($err);
+    print '{"error":"Unknown error"}' if ( !$err );
+    exit(0);
 }
 
-print "$url\n";
+print '{"url":"' . $url . '","probe":' . $probe . ',"key":' . $key . '}';
 
+$saya->disconnect();

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Saya Probe Creator</title>
+<meta charset="utf-8">
+<link rel="icon" href="/saya/assets/favicon.png">
+<link href='https://fonts.googleapis.com/css?family=Fredericka+the+Great' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css">
+<link rel="stylesheet" href="/saya/saya.css">
+<link rel="stylesheet" href="agent.css">
+
+<script data-dojo-config="async:1,debug:1,parseOnLoad:0,dojoBlankHtmlUrl:'/saya/blank.html',packages:[{name:'saya',location:'/saya'} ]" src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
+</script>
+
+<script src="agent.js"></script>
+
+</head>
+<body class="claro">
+
+
+<div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:true, liveSplitters:false" id="borderContainer">
+
+ <!-- TOP Container -->
+ <div id="divBanner" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'top'">
+  <div id="divLogo"> </div>
+  <div id="divTitle"> Probe Generator </div>
+ </div>
+
+ <!-- LEFT Container -->
+ <div class="sayaContentPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:true, region:'leading'" style="width: 50%; text-align:center">
+
+  <div class="imgFDiv">
+   <label for="image">Enter Image URL</label>
+   <input type="text" name="image" value="" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true" id="image" />
+  </div>
+
+  <div class="imagePane" id="imageExample" > </div>
+ </div>
+
+ <!-- RIGHT Container -->
+ <div class="sayaContentPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:true, region:'center'" style="width: 50%; text-align:center">
+
+  <div class="imgFDiv">
+   <label for="probe">Get Probe URL</label>
+   <input type="text" name="image" value="" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true" id="probe" />
+  </div>
+
+  <div class="imagePane" id="imageResult" >
+   <p>
+    <b>Quick Start:</b>
+     <ul>
+      <li> Enter a URL for an image on the Internet in the <em>Image URL</em> field. </li>
+      <li> Wait a few seconds for the Probe URL to be generated.</li>
+      <li> Copy the <em>Probe URL</em> and use it to post the image.</li>
+     </ul>
+    </p>
+
+   <p>
+    <b>Guidelines:</b>
+     <ul>
+      <li> Post images in the context of the discussion.</li>
+      <li> Use one probe per post or signature.  People do not normally post the same image twice.</li>
+      <li> Use smaller pictures. Some forums download images locally and resize them if they are too big.  That would remove both Saya and the original site form the loop.</li>
+      <li>Use a temporary account when possible. Even though this service is very hard to detect, it is always best to be careful not to blow your cover.</li>
+     </ul>
+    </p>
+
+    <p>
+     <b>Best Practices:</b>
+     <ul>
+      <li>Post on the first page of a thread.</li>
+      <li>Use a signature. It is not searchable.</li>
+     </ul>
+    </p>
+  </div>
+ </div>
+
+ <!-- BOTTOM Container -->
+ <div id="divSignature" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'bottom'">
+  Powered by Saya, Anti-Spy for Guilds.
+ </div>
+
+</div>
+
+</body>
+</html>

@@ -25,7 +25,7 @@
   forumUser => "saya",
   forumPass => "password",
 
-# Optional: Used by makeUrls.pl
+# Optional: Used by generateProbeUrl.pl and probe generator
   logURL => "http://yoursite.com/log.pl"
 
 }
