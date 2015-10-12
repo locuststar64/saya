@@ -22,34 +22,6 @@
  * SOFTWARE.
  */
 
-html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow:hidden;
-}
-
-#borderContainer {
-    width: 100%;
-    height: 100%;
-}
-
-#logo {
- position: absolute;
- top: 2;
- left: 2;
- z-index: -200;
- width:362px;
- height:60px;
- background: url(http://forum-serrated-us.s3-us-west-2.amazonaws.com/original/2X/4/4cd3888701067e517bbe7cb62c78820bd10ade9a.png)
-}
-#spacer {
-  width: 100%;
-  height: 30px;
-}
-#content {
-	overflow: auto;
-}
 
 .suspects {
 	padding: 20px;

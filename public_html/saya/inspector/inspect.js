@@ -65,9 +65,6 @@ require([
   		 	domConstruct.place(hitTemplate(data.suspects[i].log[j]),tbl,"last");
 		}
 	}
-  // var th = domConstruct.create("th", null, tr);
- //  th.innerHTML = "Hello";
-
    wjt.content.set("content", tbl);
  };
 
