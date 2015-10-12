@@ -28,7 +28,6 @@ require([
 "dojo/request/xhr", 'saya/3p/handlebars', 'dojo/domReady!'
 ], function (registry, dojoDom, on, domConstruct, parser, TextBox, ContentPane, BorderContainer, xhr, HandleBars) {
 
-
   parser.parse();
 
   var wjt = {
@@ -69,60 +68,5 @@ require([
  };
 
   getData().then(updatePage);
-
-});
-require([
-    'dijit/registry', 'dojo/dom', 'dojo/on', 'dojo/dom-construct', 'dojo/parser', 'dijit/form/TextBox',
-    'dijit/layout/ContentPane', 'dijit/layout/BorderContainer',
-    "dojo/request/xhr", 'saya/3p/handlebars',
-    'dojo/domReady!'
-], function(registry, dojoDom, on, domConstruct, parser, TextBox, ContentPane, BorderContainer, xhr, HandleBars) {
-
-
-    parser.parse();
-
-    var wjt = {
-        content: registry.byId("content"),
-    };
-
-    var dom = {
-        usrRow: dojoDom.byId("usr-template"),
-        hitRow: dojoDom.byId("hit-template")
-    };
-
-    var hitTemplate = HandleBars.compile(dom.hitRow.innerHTML);
-    var usrTemplate = HandleBars.compile(dom.usrRow.innerHTML);
-
-    var getData = function() {
-
-        return xhr("inspect.pl", {
-            handleAs: "json"
-        });
-    };
-
-    var updatePage = function(data) {
-
-        data.suspects.sort(function(a, b) {
-            if (a.user < b.user) return -1;
-            if (a.user > b.user) return 1;
-            return 0;
-        });
-
-        var tbl = domConstruct.create("table", {
-            className: "suspects"
-        });
-        for (var i = 0; i < data.suspects.length; i++) {
-            domConstruct.place(usrTemplate(data.suspects[i]), tbl, "last");
-            for (var j = 0; j < data.suspects[i].log.length; j++) {
-                domConstruct.place(hitTemplate(data.suspects[i].log[j]), tbl, "last");
-            }
-        }
-        // var th = domConstruct.create("th", null, tr);
-        //  th.innerHTML = "Hello";
-
-        wjt.content.set("content", tbl);
-    };
-
-    getData().then(updatePage);
 
 });
