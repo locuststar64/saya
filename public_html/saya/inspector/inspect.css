@@ -22,12 +22,145 @@
  * SOFTWARE.
  */
 
-
-.suspects {
-	padding: 20px;
+#flag {
+    font-size: 12pt;
+    font-family: 'Comfortaa', cursive !important;
+  background-color: #000 !important;
+	color: #ccc;
+        border-color: #777;
+        border-width: 2px;
+        border-style: solid;
+         padding: 2px;
+	top: -1000px;
+	left: 0;
+	position: absolute;
+	z-index: 99999;
+        opacity: 0.75;
 }
-.suspects TD {
-	padding: 4px;
-	white-space: nowrap;
+
+.flagimage {
+	max-width: 500px;
+	max-height: 100px;
 }
 
+#flag TABLE {
+	margin: 0;
+	padding: 0;
+	border-width: 1px;
+	border-color: red;
+}
+
+#flag TH {
+        font-weight: bold;
+	text-align: left;
+	color: #0c0;
+	padding: 2px;
+	padding-right: 10px;
+}
+
+#flag TD {
+	padding: 2px;
+	color: #cfc;
+	text-align: left;
+	padding-right: 10px;
+}
+
+#suspectsGridx .gridxRow [colid="host"].gridxCell  {
+	text-align: center;
+}
+#suspectsGridx .gridxRow [colid="ip"].gridxCell  {
+         font-size:11pt;
+        font-family: Verdana, Geneva, sans-serif;
+	text-align: center;
+}
+.ipaddress {
+         font-size:11pt;
+        font-family: Verdana, Geneva, sans-serif;
+}
+#suspectsGridx .gridxRow [colid="last"].gridxCell  {
+	text-align: center;
+}
+#suspectsGridx .gridxRow [colid="hits"].gridxCell  {
+	text-align: center;
+}
+
+#suspectsGrid  {
+        width: 98%;
+         height: 98%;
+    }
+
+#suspectsGridx {
+         height: 98%;
+        background: transparent !important;
+        border-color: transparent !important;
+  border-color: #000 !important;
+    font-size: 12pt;
+    font-family: 'Comfortaa', cursive !important;
+}
+
+.sharedIP {
+  color: yellow;
+}
+
+.gridxBody {
+  background-image: none !important;
+        background: #333 !important;
+        border-color: #333 !important;
+  border-color: #000 !important;
+}
+
+
+.gridxRow tr {
+  border-color: transparent !important;
+  background-color: #333;
+  color: #ccc;
+  border-color: #000 !important;
+}
+
+.gridxRowOdd tr {
+  background-color: #222;
+}
+
+.gridxHeaderRowInner {
+  border-color: #000 !important;
+}
+
+.gridxRow tr:hover td {
+  background-color: #100 !important;
+  color: #fff !important;
+}
+
+.gridxCell {
+  border-color: #000 !important;
+}
+
+.gridxHeader {
+  border-color: #000 !important;
+}
+
+.gridxHeader .gridxCell {
+  background-image: none !important;
+  background-color: #000 !important;
+}
+
+.gridxTitleBar, .gridxSummeryBar, .gridxBar {
+  background-image: none !important;
+  color: #ccc;
+  background-color: #333 !important;
+  border: 0 !important;
+  border-color: #333 !important;
+}
+ 
+.gridxVScroller {
+  background-image: none !important;
+  background-color: #333 !important;
+}
+
+.gridxHeaderRow {
+  background-image: none !important;
+  background-color: #100 !important;
+}
+
+.gridxHeader .gridxCell div {
+  color: #eee;
+}

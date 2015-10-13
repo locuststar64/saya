@@ -1,0 +1,3 @@
+[submodule "public_html/saya/3p/gridx"]
+	path = public_html/saya/3p/gridx
+	url = https://github.com/oria/gridx.git

@@ -44,11 +44,49 @@ my $saya = Saya->new($config);
 die $_ if ( $saya->connect() );
 my $suspects  = $saya->getSuspects();
 my $sharedIPs = $saya->getSharedIPs();
+
+use Data::Dumper;
+# get ip info
+my %ipset = ();
+my %probeset = ();
+my $item;
+my $ip;
+foreach $item ( @$suspects ) {
+   my $log;
+   foreach $log ( @{$$item{"log"}} ) {
+	$ipset{$$log{"ip"}} = 1;
+	$probeset{$$log{"probe"}} = 1;
+   }
+}
+foreach $item ( @$sharedIPs ) {
+   $ipset{$$item{"ip"}} = 1;
+}
+
+my @keys = keys(%ipset);
+my %ips =  ();
+foreach $ip ( @keys ) {
+  my $entry = $saya->getIPInfo($ip);
+  $ips{$ip} = $entry if ($entry);
+}
+
+@keys = keys(%probeset);
+my %probes =  ();
+my $probe;
+foreach $probe ( @keys ) {
+  my $entry = $saya->getProbeById($probe);
+   if ($entry) {
+		 $$entry{"key"} = sprintf("%X", $$entry{"key"});
+  $probes{$probe} = $entry;
+	}
+}
+
 $saya->disconnect();
 
 my $data = {
     suspects => $suspects,
-    dupips   => $sharedIPs
+    dupips   => $sharedIPs,
+    probes   => \%probes,
+    ips   => \%ips
 };
 
 my $json = encode_json($data);

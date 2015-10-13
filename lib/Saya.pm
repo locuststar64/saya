@@ -240,13 +240,12 @@ qq(select hostname, loc, org, city, region, country, postal, phone from saya_ipi
         my $data = decode_json( $$response{"content"} );
 
         # prevent undefined fields
-        print "XXX: caching\n";
         my $sql2 =
 qq(insert into saya_ipinfo (ip, hostname, loc, org, city, region, country, postal, phone, created) values (?,?,?,?,?,?,?,?,?,datetime()););
         my $sth2 = $$self{"_dbh"}->prepare($sql2);
         $sth2->execute(
-            $ip,               $$data{"hostname"}, $$data{"hostname"},
-            $$data{"loc"},     $$data{"org"},      $$data{"region"},
+            $ip,               $$data{"hostname"},
+            $$data{"loc"},     $$data{"org"},     $$data{"city"},  $$data{"region"},
             $$data{"country"}, $$data{"postal"},   $$data{"phone"}
         );
         $sth2->finish();
