@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Saya Inspector</title>
+<title>Saya Suspect Inspector</title>
 
 <meta charset="utf-8">
 <link rel="icon" href="/saya/assets/favicon.png">
@@ -27,10 +27,11 @@
    {{#if users}}<tr><th>Users:</th><td><span class="sharedIP">{{users}}</span></td></tr>{{/if}}
    {{#if hostname}}<tr><th>Hostname:</th><td>{{hostname}}</td></tr>{{/if}}
    {{#if city}}<tr><th>City:</th><td>{{city}}</td></tr>{{/if}}
+   {{#if region}}<tr><th>Region:</th><td>{{region}}</td></tr>{{/if}}
    {{#if country}}<tr><th>Country:</th><td>{{country}}</td></tr>{{/if}}
+   {{#if postal}}<tr><th>Postal:</th><td>{{postal}}</td></tr>{{/if}}
    {{#if loc}}<tr><th>Location:</th><td>{{loc}}</td></tr>{{/if}}
    {{#if org}}<tr><th>Organization:</th><td>{{org}}</td></tr>{{/if}}
-   {{#if postal}}<tr><th>Postal:</th><td>{{postal}}</td></tr>{{/if}}
    {{#if phone}}<tr><th>Phone:</th><td>{{phone}}</td></tr>{{/if}}
   </table>
 </script>
@@ -61,7 +62,7 @@
  <!-- TOP Container -->
  <div id="divBanner" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'top'">
   <div id="divLogo"> </div>
-  <div id="divTitle"> Saya Inspector </div>
+  <div id="divTitle"> Suspect Inspector </div>
  </div>
 
   <div  class="sayaContentPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:true, region:'leading'" id="content" style="width: 100%; text-align:left; overflow:auto;">

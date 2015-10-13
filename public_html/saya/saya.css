@@ -81,7 +81,7 @@ label {
 }
 
 #divTitle {
- padding-top:10px;
+ padding-top:3px;
  height:110px;
  vertical-align:middle;
  color: #f00;
@@ -94,12 +94,13 @@ label {
      margin: 0;
      border: 0;
      color: #C00;
-     font-size: smaller;
      border-color: transparent;
      width: 100%;
      background-color: transparent;
      text-align:center;
      vertical-align:middle;
+     font-size: small;
+    font-family: 'Comfortaa', cursive;
 }
 
 
