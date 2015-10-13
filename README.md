@@ -1,8 +1,7 @@
-# Saya
+# Saya: Anti-Spy Software for Guilds.
 
-![logo](https://github.com/sunsetbrew/saya/blob/master/public_html/saya/assets/welcome.png)
+![logo][logo]
 
-## Anti-Spy Software for Guilds.
 
 >
 ## WARNING: Pre-Alpha
@@ -12,7 +11,10 @@
 ## Requirements
 
 - Perl with DBD::SQLite installed.
+- Perl with HTTP:Tiny installed.
+- Perl with JSON installed.
 
+### If using Discourse
 - If using updateDiscourseUsers.pl, must have Perl with DBD::Pg as well.
 ```
 sudo yum install perl-DBD-Pg
@@ -58,5 +60,9 @@ It is best to populate the saya_users table periodically to keep up with changin
 Add the following **crontab** for Discourse forum Users:
 ```
     0 1,13 * * * SAYA_CONFIG=/path-to-saya/saya.conf /path-to-saya/updateDiscourseUsers.pl >/dev/null 2>&1
-    0 2,8,14,20 * * * SAYA_CONFIG=/path-to-saya/saya.conf /path-to-saya/updateSuspects.pl >/dev/null 2>&1
+    0 * * * * SAYA_CONFIG=/path-to-saya/saya.conf /path-to-saya/maintenance/updateSuspects.pl >/dev/null 2>&1
+    0 2 * * * SAYA_CONFIG=/path-to-saya/saya.conf /path-to-saya/maintenance/purgeOldData.pl >/dev/null 2>&1
 ```
+
+[logo]: https://github.com/sunsetbrew/saya/blob/master/public_html/saya/assets/welcome.png "Logo"
+[banner]: https://github.com/sunsetbrew/saya/blob/master/public_html/saya/assets/banner.png "Banner"
