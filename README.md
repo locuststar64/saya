@@ -24,6 +24,12 @@ sudo yum install perl-DBD-Pg
 
 - Put Saya somewhere not exposed by the web server.
 
+- Get the submodules
+```
+ git submodule init
+ git submodule update
+```
+
 - Update the configuration. 
 ```
  cp saya.conf.example  saya.conf
