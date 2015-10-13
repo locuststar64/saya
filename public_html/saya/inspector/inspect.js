@@ -22,28 +22,22 @@
  * SOFTWARE.
  */
 require([
-    'dijit/registry', 'dojo/dom', 'dojo/on', 'dojo/dom-construct', 'dojo/parser', 'dijit/form/TextBox',
-    'dojo/dom-style', 'saya/3p/handlebars',
-    'dijit/layout/ContentPane', 'dijit/layout/BorderContainer', "dojo/request/xhr",
-    "dojo/_base/array", "dojo/_base/lang", "dojo/Deferred",
+    'dijit/registry', 'dojo/dom', 'dojo/on', 'dojo/parser',
+    'dojo/dom-style', 'saya/3p/handlebars', "dojo/request/xhr", "dojo/_base/lang",
     "gridx/core/model/cache/Sync", "gridx/Grid", "gridx/modules/Tree",
-    "gridx/modules/SingleSort",
-    "gridx/modules/Filter", "gridx/modules/Bar",
-    "gridx/support/Summary",
-    "gridx/support/DropDownPager",
-    "gridx/support/QuickFilter",
-    "gridx/modules/VirtualVScroller",
-    'dojo/store/Memory',
-    'dojo/domReady!'
-], function(registry, dojoDom, on, domConstruct, parser, TextBox, domStyle, HandleBars, ContentPane, BorderContainer, xhr,
-    arrayUtil, lang, Deferred, Cache, Grid, Tree, SingleSort, Filter, Bar,
-    Summary, DropDownPager, QuickFilter, VirtualVScroller,
+    "gridx/modules/SingleSort", "gridx/modules/Filter", "gridx/modules/Bar",
+    "gridx/support/Summary", "gridx/support/QuickFilter", "gridx/modules/VirtualVScroller",
+    'dojo/store/Memory', 'dojo/domReady!'
+], function(registry, dojoDom, on, parser,
+    domStyle, HandleBars, xhr, lang,
+    Cache, Grid, Tree,
+    SingleSort, Filter, Bar,
+    Summary, QuickFilter, VirtualVScroller,
     Memory) {
 
     parser.parse();
 
     var wjt = {
-        content: registry.byId("content")
     };
 
     var dom = {
@@ -218,7 +212,7 @@ require([
             decorator: function(value, id, row) {
                 // add style for entries with a shared ip
                 if (this[String(value)]) {
-                    return '<span class="sharedIP" title="' + this[String(value)].usernames + '">' + value + '</span>';
+                    return '<span class="sharedIP">' + value + '</span>';
                 }
                 return value;
             }.bind(sharedIps)
