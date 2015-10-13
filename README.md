@@ -1,6 +1,6 @@
 # Saya
 
-https://github.com/sunsetbrew/saya/blob/master/public_html/saya/assets/welcome.png
+![logo](https://github.com/sunsetbrew/saya/blob/master/public_html/saya/assets/welcome.png)
 
 ## Anti-Spy Software for Guilds.
 
