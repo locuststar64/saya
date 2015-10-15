@@ -1,4 +1,4 @@
-# Saya: Anti-Spy Software for Guilds.
+# Saya: Anti-Spy for Guilds.
 
 ![logo][logo]
 
