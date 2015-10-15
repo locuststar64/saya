@@ -8,6 +8,16 @@
 
 *Saya is a work in progress. It is not recommended that anyone use it.*
 
+## Features
+
+Saya helps identify suspects from enemy guilds that are trying to infultrate the user's guild.
+
+- Web GUI for Analyizing Suspects  
+- Web GUI for Generating Probes  
+- Backend software for collecting, manageing data, 
+
+For information on how it works, see the [white paper]( https://github.com/sunsetbrew/saya/blob/master/doc/Saya-WhitePaper.md);
+
 ## Requirements
 
 - Perl with DBD::SQLite installed.
