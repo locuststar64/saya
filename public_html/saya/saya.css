@@ -69,6 +69,7 @@ label {
      height: 120px; 
     background-color: transparent;
  text-align:center;
+   cursor: pointer;
 }
 
 #divLogo {
@@ -86,6 +87,15 @@ label {
  vertical-align:middle;
  color: #f00;
  font-size: 70px;
+ font-family: 'Fredericka the Great', cursive;
+}
+
+#divSlogan {
+ padding-top:75px;
+ vertical-align:bottom;
+ text-align: center;
+ color: #777;
+ font-size: 30px;
  font-family: 'Fredericka the Great', cursive;
 }
  
