@@ -27,7 +27,7 @@ instead redirecting the web browser to the real image.
 
 ## Known Issues
 - Images that are Saya probes will break if Saya is turned off.
-- Some Internet bandwidth will be consumed, although minimal because Saya does not deliver the images directly and it leverage browser caching to prevent unnecessary repeated visits.
+- Some Internet bandwidth will be consumed, although minimal because Saya does not deliver the images directly and it leverages browser caching to prevent unnecessary repeated visits.
 
 [logo]: https://github.com/sunsetbrew/saya/blob/master/public_html/saya/assets/welcome.png "Logo"
 [probediagram]: https://github.com/sunsetbrew/saya/blob/master/doc/Saya-Probe.png "Probe Diagram"
