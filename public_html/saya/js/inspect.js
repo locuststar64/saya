@@ -22,22 +22,24 @@
  * SOFTWARE.
  */
 require([
-    'dijit/registry', 'dojo/dom', 'dojo/on', 'dojo/parser',
-    'dojo/dom-style', 'saya/3p/handlebars', "dojo/request/xhr", "dojo/_base/lang",
+    'dojo/ready','dijit/registry', 'dojo/dom', 'dojo/on', 'dojo/parser',
+    'dojo/dom-style', '3p/handlebars', "dojo/request/xhr", "dojo/_base/lang",
     "gridx/core/model/cache/Sync", "gridx/Grid", "gridx/modules/Tree",
     "gridx/modules/SingleSort", "gridx/modules/Filter", "gridx/modules/Bar",
     "gridx/support/Summary", "gridx/support/QuickFilter", "gridx/modules/VirtualVScroller",
-    'dojo/store/Memory', 'dojo/domReady!'
-], function(registry, dojoDom, on, parser,
+    'dojo/store/Memory', 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dojo/domReady!'
+], function(ready,registry, dojoDom, on, parser,
     domStyle, HandleBars, xhr, lang,
     Cache, Grid, Tree,
     SingleSort, Filter, Bar,
     Summary, QuickFilter, VirtualVScroller,
-    Memory) {
+    Memory, TabContainer, ContentPane) {
 
-    parser.parse();
 
     var wjt = {
+        init: function() {
+        	this.content = registry.byId("tabs");
+	}
     };
 
     var dom = {
@@ -74,37 +76,49 @@ require([
 
     var getData = function() {
 
-        return xhr("inspect.pl", {
+        return xhr("cgi/inspect.pl", {
             handleAs: "json"
         });
     };
 
-    var createSuspectsGrid = function(data) {
+    var createTabContainer = function(data) {
+	var groups = {};
+        for (var i = 0; i < data.suspects.length; i++) {
+	    var group = data.suspects[i];
+	    if (!(group.group_id in groups)) {
+		groups[group.group_id] = 1;
+		var panel = new ContentPane({
+         		title: group.group_label,
+			content: '<div id="grp' + group.group_id + '" />'
+
+   		 });
+		wjt.content.addChild(panel);
+		   createSuspectsGrid("grp" + group.group_id, group, group.users, data.dupips, data.ips, data.probes);
+		}
+	    }
+    };
+
+    var createSuspectsGrid = function(panel, group, users, dupips, ips, probes) {
 
 
         var sharedIps = {};
-        for (var i = 0; i < data.dupips.length; i++) {
-            var dip = data.dupips[i];
+        for (var i = 0; i < dupips.length; i++) {
+            var dip = dupips[i];
             sharedIps[dip.ip] = {
                 users: dip.users
             };
-            var html = '<table class="sharedIPInfo">';
-            var usernames = '';
+            var usernames = [];
             for (var j = 0; j < dip.users.length; j++) {
-                var u = dip.users[j];
-                html = html + '<tr><td>' + u.user + '</td><td>' + u.last + '</td></tr>';
-                if (usernames) usernames = usernames + ', ';
-                usernames = usernames + u.user;
+                usernames.push( dip.users[j] );
             }
-            sharedIps[dip.ip].html = html + '</table>';
             sharedIps[dip.ip].usernames = usernames;
         }
 
         var rowIndex = [];
         var mem = [];
-        for (var i = 0; i < data.suspects.length; i++) {
+        for (var i = 0; i < users.length; i++) {
 
-            var suspect = data.suspects[i];
+            var suspect = users[i];
             var host = null;
             var entry;
             var children;
@@ -118,6 +132,7 @@ require([
                         id: rowIndex.length,
                         userid: suspect.userid,
                         user: suspect.user,
+                        group_label: suspect.group_label,
                         host: host,
                         hits: 0,
                         last: log.last,
@@ -131,6 +146,7 @@ require([
                 var rec = {
                     id: rowIndex.length,
                     user: suspect.user,
+                    group_label: suspect.group_label,
                     host: host,
                     last: log.last,
                     referer: log.referer,
@@ -144,8 +160,8 @@ require([
                         id: log.probe
                     }
                 };
-                if (data.ips[log.ip]) rec.ipinfo = data.ips[log.ip];
-                if (data.probes[log.probe]) rec.probeinfo = data.probes[log.probe];
+                if (ips[log.ip]) rec.ipinfo = ips[log.ip];
+                if (probes[log.probe]) rec.probeinfo = probes[log.probe];
                 if (sharedIps[log.ip])
                     rec.ipinfo.users = sharedIps[log.ip].usernames;
                 children[children.length] = rec;
@@ -223,7 +239,8 @@ require([
         }];
 
         var suspectsGrid = Grid({
-            id: 'suspectsGridx',
+	    autoHeight: true,
+            style: "width:99%;padding:0",
             cacheClass: Cache,
             store: store,
             structure: structure,
@@ -235,8 +252,9 @@ require([
                 }
             ],
             modules: [Tree, SingleSort, Filter, Bar, VirtualVScroller],
+            //modules: [Tree, SingleSort, Filter, Bar],
         });
-        suspectsGrid.placeAt('suspectsGrid');
+        suspectsGrid.placeAt(panel);
 
         var SGCOL_USER = 0;
         var SGCOL_IP = 4;
@@ -267,6 +285,10 @@ require([
         suspectsGrid.startup();
     };
 
-    getData().then(createSuspectsGrid);
-
+    ready(function() {
+   	 parser.parse().then(function() {
+	wjt.init();
+        getData().then(createTabContainer);
+	});
+    });
 });

@@ -51,7 +51,7 @@ require([
             }
         }
 
-        xhr("agent.pl", {
+        xhr("cgi/probe.pl", {
             handleAs: "json",
             query: {
                 url: rmturl,

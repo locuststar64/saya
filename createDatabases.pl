@@ -41,34 +41,59 @@ qq(create table saya_log ( ip VARCHAR(15), host VARCHAR(128), referer VARCHAR(25
 ) or die($DBI::errstr);
 
 $sayaDbh->do(
-qq(create table saya_users ( ip VARCHAR(15), userid VARCHAR(64), user VARCHAR(128), last INT, PRIMARY KEY (ip, userid) );)
+qq(create table saya_users (  usergroup_id INT, ip VARCHAR(15), userid VARCHAR(64), user VARCHAR(128), last INT, PRIMARY KEY ( usergroup_id, ip, userid) );)
 ) or die($DBI::errstr);
 
 $sayaDbh->do(
-    qq(create table saya_suspects ( ip VARCHAR(15), PRIMARY KEY (ip) );))
+    qq(create table saya_agents ( id INT, name VARCHAR(64), PRIMARY KEY (id) );)
+) or die($DBI::errstr);
+
+$sayaDbh->do(qq(create index saya_agentname_index on saya_agents ( name );))
   or die($DBI::errstr);
+
+$sayaDbh->do(
+qq(create table saya_usergroups ( id INT, name VARCHAR(64), label VARCHAR(128), PRIMARY KEY (id) );)
+) or die($DBI::errstr);
+
+$sayaDbh->do(qq(create index saya_groupname_index on saya_usergroups ( name );))
+  or die($DBI::errstr);
+
+$sayaDbh->do(
+qq(create table saya_hostsignore ( usergroup_id INT, host VARCHAR(128), PRIMARY KEY ( usergroup_id, host ) );)
+) or die($DBI::errstr);
+
+$sayaDbh->do(
+qq(create table saya_authorizedgroups ( agent_id INT, usergroup_id INT, PRIMARY KEY ( agent_id, usergroup_id) );)
+) or die($DBI::errstr);
+
+$sayaDbh->do(
+qq(create table saya_suspects (  usergroup_id INT, ip VARCHAR(15), PRIMARY KEY (usergroup_id, ip) );)
+) or die($DBI::errstr);
 
 $sayaDbh->do(
     qq(create table saya_nolog ( host VARCHAR(128), PRIMARY KEY (host) );))
   or die($DBI::errstr);
 
 $sayaDbh->do(
-    qq(create table saya_ipinfo ( ip VARCHAR(15), hostname VARCHAR(128), loc VARCHAR(128), org VARCHAR(128), city VARCHAR(128), region VARCHAR(128), country VARCHAR(128), postal VARCHAR(128), phone VARCHAR(128), created INT, PRIMARY KEY (ip) );)
-  or die($DBI::errstr);
+qq(create table saya_ipinfo ( ip VARCHAR(15), hostname VARCHAR(128), loc VARCHAR(128), org VARCHAR(128), city VARCHAR(128), region VARCHAR(128), country VARCHAR(128), postal VARCHAR(128), phone VARCHAR(128), created INT, PRIMARY KEY (ip) );)
+) or die($DBI::errstr);
 
 $sayaDbh->do(
 qq(create table saya_probes ( id INT, key INT, isactive INT, redirect VARCHAR(256), host_override VARCHAR(128), note VARCHAR(256), creator VARCHAR(64), PRIMARY KEY (id) );)
 ) or die($DBI::errstr);
 
-$sayaDbh->do( qq(create index saya_key_index on saya_probes ( key );) )
+$sayaDbh->do(qq(create index saya_key_index on saya_probes ( key );))
   or die($DBI::errstr);
 
-$sayaDbh->do( qq(create table saya_version ( major INT, minor INT );) )
+$sayaDbh->do(qq(create table saya_version ( major INT, minor INT );))
   or die($DBI::errstr);
 
-$sayaDbh->do( qq(insert into saya_version (major, minor) values ( 0, 1 );) )
+$sayaDbh->do(qq(insert into saya_version (major, minor) values ( 0, 1 );))
   or die($DBI::errstr);
 
+$sayaDbh->do(
+qq(insert into saya_usergroups (id,name,label) values ( 1, "local", "Local Users" );)
+) or die($DBI::errstr);
 
 $sayaDbh->disconnect();
 

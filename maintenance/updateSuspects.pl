@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -CS
 # The MIT License (MIT)
 #
 # Copyright (c) 2015 No Face Press, LLC

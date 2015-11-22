@@ -65,39 +65,10 @@
 	padding-right: 10px;
 }
 
-#suspectsGridx .gridxRow [colid="host"].gridxCell  {
-	text-align: center;
-}
-#suspectsGridx .gridxRow [colid="ip"].gridxCell  {
-         font-size:11pt;
-        font-family: Verdana, Geneva, sans-serif;
-	text-align: center;
-}
 .ipaddress {
          font-size:11pt;
         font-family: Verdana, Geneva, sans-serif;
 }
-#suspectsGridx .gridxRow [colid="last"].gridxCell  {
-	text-align: center;
-}
-#suspectsGridx .gridxRow [colid="hits"].gridxCell  {
-	text-align: center;
-}
-
-#suspectsGrid  {
-        width: 98%;
-         height: 98%;
-    }
-
-#suspectsGridx {
-         height: 98%;
-        background: transparent !important;
-        border-color: transparent !important;
-  border-color: #000 !important;
-    font-size: 12pt;
-    font-family: 'Comfortaa', cursive !important;
-}
-
 .sharedIP {
   color: yellow;
 }
@@ -163,4 +134,51 @@
 
 .gridxHeader .gridxCell div {
   color: #eee;
+}
+
+#tabs .dijitTabContainerTop-dijitContentPane, .claro .dijitTabContainerLeft-dijitContentPane, .claro .dijitTabContainerBottom-dijitContentPane, .claro .dijitTabContainerRight-dijitContentPane, .claro .dijitAccordionContainer-dijitContentPane
+{
+  background-color: #333 !important;
+  color: #eee;
+}
+
+#tabs .dijitTabPaneWrapper {
+  background-color: #333 !important;
+}
+
+#tabs {
+  padding: 0px;
+}
+
+#tabs .gridx {
+    font-family: 'Comfortaa', cursive !important;
+    font-size: 11pt;
+	border: 0;
+}
+
+#tabs .dijitTab {
+    font-family: 'Comfortaa', cursive !important;
+  color: #000;
+   font-weight: bold;
+  padding: 10px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+ border-color: #111;
+ background-image: none;
+ background-color: #999;
+  font-size: 11pt;
+}
+
+
+#tabs .dijitTabChecked {
+    font-family: 'Comfortaa', cursive !important;
+  color: #fff;
+   font-weight: bold;
+  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+ border-color: #111;
+ background-image: none;
+ background-color: #555;
+  font-size: 12pt;
 }

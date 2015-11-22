@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+use Getopt::Long;
 use strict;
 use warnings;
 
@@ -38,60 +39,35 @@ BEGIN {
 }
 
 use Saya;
-use JSON qw/encode_json/;
 
 my $saya = Saya->new($config);
 die $_ if ( $saya->connect() );
-my $suspects  = $saya->getSuspects();
-my $sharedIPs = $saya->getSharedIPs();
 
-use Data::Dumper;
-# get ip info
-my %ipset = ();
-my %probeset = ();
-my $item;
-my $ip;
-foreach $item ( @$suspects ) {
-   my $log;
-   foreach $log ( @{$$item{"log"}} ) {
-	$ipset{$$log{"ip"}} = 1;
-	$probeset{$$log{"probe"}} = 1;
-   }
-}
-foreach $item ( @$sharedIPs ) {
-   $ipset{$$item{"ip"}} = 1;
-}
+my $group  = "local";
+my $file   = "";
+my $optsok = GetOptions(
+    "group=s" => \$group,
+    "file=s"  => \$file
+);
 
-my @keys = keys(%ipset);
-my %ips =  ();
-foreach $ip ( @keys ) {
-  my $entry = $saya->getIPInfo($ip);
-  $ips{$ip} = $entry if ($entry);
+if ( !$optsok or !$file or !-f $file ) {
+    print <<EOF;
+ Usage:
+   --file=user.csv                   file to import  (REQUIRED)
+   --group=local                     the group to import users into.
+
+ CSV Format: RFC-4180 (Excell)
+
+   user id,user name,ip address
+EOF
+    exit(1);
 }
 
-@keys = keys(%probeset);
-my %probes =  ();
-my $probe;
-foreach $probe ( @keys ) {
-  my $entry = $saya->getProbeById($probe);
-   if ($entry) {
-		 $$entry{"key"} = sprintf("%X", $$entry{"key"});
-  $probes{$probe} = $entry;
-	}
-}
+my $rsp = $saya->importUsersFromCSV( $group, $file );
 
 $saya->disconnect();
 
-my $data = {
-    suspects => $suspects,
-    dupips   => $sharedIPs,
-    probes   => \%probes,
-    ips   => \%ips
-};
+die $rsp if ($rsp);
 
-my $json = encode_json($data);
+exit(0);
 
-print "Content-type: application/json\r\n";
-print "Content-Length: " . length($json) . "\r\n";
-print "\r\n";
-print "$json\n";

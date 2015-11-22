@@ -3,17 +3,33 @@
 <head>
 <title>Saya Probe Creator</title>
 <meta charset="utf-8">
-<link rel="icon" href="/saya/assets/favicon.png">
+<link rel="icon" href="assets/favicon.png">
 <link href='https://fonts.googleapis.com/css?family=Fredericka+the+Great' rel='stylesheet' type='text/css'>
 <link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css">
-<link rel="stylesheet" href="/saya/saya.css">
-<link rel="stylesheet" href="agent.css">
+<link rel="stylesheet" href="css/saya.css">
+<link rel="stylesheet" href="css/probe.css">
 
-<script data-dojo-config="async:1,debug:false,parseOnLoad:false,dojoBlankHtmlUrl:'/saya/blank.html',packages:[{name:'saya',location:'/saya'} ]" src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
+<script>
+var basePath = window.location.href;
+basePath = basePath.substring(0, basePath.lastIndexOf("/"));
+dojoConfig = {
+    async: true,
+    debug: false,
+    parseOnLoad: false,
+    dojoBlankHtmlUrl: basePath + '/assets/blank.html',
+    packages: [{
+        name: 'saya',
+        location: basePath + '/js'
+    }, {
+        name: '3p',
+        location: basePath + '/3p'
+    }]
+};
 </script>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
 
-<script src="agent.js"></script>
+<script src="js/probe.js"></script>
 
 </head>
 <body class="claro">
@@ -23,7 +39,7 @@
 
  <!-- TOP Container -->
  <div id="divBanner" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'top'">
-  <div ondblclick="location='https://github.com/sunsetbrew/saya'" id="divLogo"> </div>
+  <div ondblclick="location='https://github.com/sunsetbrew/saya'" onclick="location='index.html'" id="divLogo"> </div>
   <div id="divTitle"> Probe Generator </div>
  </div>
 

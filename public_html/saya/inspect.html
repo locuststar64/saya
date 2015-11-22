@@ -4,27 +4,48 @@
 <title>Saya Suspects</title>
 
 <meta charset="utf-8">
-<link rel="icon" href="/saya/assets/favicon.png">
+<link rel="icon" href="assets/favicon.png">
 <link href='https://fonts.googleapis.com/css?family=Fredericka+the+Great' rel='stylesheet' type='text/css'>
 <link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css">
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/document.css">
-<link rel="stylesheet" href="/saya/3p/gridx/resources/claro/Gridx.css">
-<link rel="stylesheet" href="/saya/saya.css">
-<link rel="stylesheet" href="inspect.css">
+<link rel="stylesheet" href="3p/gridx/resources/claro/Gridx.css">
+<link rel="stylesheet" href="css/saya.css">
+<link rel="stylesheet" href="css/inspect.css">
 
-<script data-dojo-config="async:1,debug:false,parseOnLoad:false,dojoBlankHtmlUrl:'/saya/blank.html',packages:[{name:'saya',location:'/saya'},
-    {
+<script>
+var basePath = window.location.href;
+basePath = basePath.substring(0, basePath.lastIndexOf("/"));
+dojoConfig = {
+    async: true,
+    debug: false,
+    parseOnLoad: false,
+    dojoBlankHtmlUrl: basePath + '/assets/blank.html',
+    packages: [{
+        name: 'saya',
+        location: basePath + '/js'
+    }, {
         name: 'gridx',
-        location: '/saya/3p/gridx'
-    }
-     ]" src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
+        location: basePath + '/3p/gridx'
+    }, {
+        name: '3p',
+        location: basePath + '/3p'
+    }]
+};
+</script>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
 
 
 <script id="ipflag-template" type="text/x-handlebars-template">
   <table>
    <tr><th>IP Address:</th><td><span class="ipaddress">{{ip}}</span></td></tr>
-   {{#if users}}<tr><th>Users:</th><td><span class="sharedIP">{{users}}</span></td></tr>{{/if}}
+   {{#if users}}<tr><th>Users:</th><td><span class="sharedIP">
+    <table>
+     {{#each users}}
+     <tr><td>{{group_label}}</td><td>{{user}}</td></tr>
+     {{/each}}
+    </table>
+    </span></td></tr>{{/if}}
    {{#if hostname}}<tr><th>Hostname:</th><td>{{hostname}}</td></tr>{{/if}}
    {{#if city}}<tr><th>City:</th><td>{{city}}</td></tr>{{/if}}
    {{#if region}}<tr><th>Region:</th><td>{{region}}</td></tr>{{/if}}
@@ -39,6 +60,7 @@
   <table>
    <tr><th>ID:</th><td>{{userid}}</td></tr>
    <tr><th>Name:</th><td>{{user}}</td></tr>
+   <tr><th>Group:</th><td>{{group_label}}</td></tr>
   </table>
 </script>
 <script id="probeflag-template" type="text/x-handlebars-template">
@@ -52,7 +74,7 @@
   </table>
 </script>
 
-<script src="inspect.js"></script>
+<script src="js/inspect.js"></script>
 
 </head>
 <body class="claro">
@@ -61,12 +83,11 @@
 
  <!-- TOP Container -->
  <div id="divBanner" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'top'">
-  <div ondblclick="location='https://github.com/sunsetbrew/saya'" id="divLogo"> </div>
+  <div ondblclick="location='https://github.com/sunsetbrew/saya'"  onclick="location='index.html'" id="divLogo"> </div>
   <div id="divTitle"> Saya Suspects </div>
  </div>
 
-  <div  class="sayaContentPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:true, region:'leading'" id="content" style="width: 100%; text-align:left; overflow:auto;">
-   <div id="suspectsGrid" > </div>
+  <div  class="sayaContentPane" data-dojo-type="dijit/layout/TabContainer" data-dojo-props="doLayout:false,id:'tabs',splitter:true, region:'leading'" id="tabs" style="width: 100%; text-align:left; overflow:auto;">
   </div>
 
  <div id="divSignature" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'bottom'">

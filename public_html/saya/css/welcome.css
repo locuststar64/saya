@@ -36,3 +36,18 @@
  font-size: 120px;
  font-family: 'Fredericka the Great', cursive;
 }
+
+A {
+	color: red;
+ 	text-decoration:  none;
+}
+
+.features {
+ display: inline-block;
+  max-width: 50%;
+  margin: auto;
+}
+
+.features DL {
+  text-align: left;
+}

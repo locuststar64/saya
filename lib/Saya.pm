@@ -24,7 +24,9 @@ package Saya;
 
 use DBI;
 use HTTP::Tiny;
+use Text::CSV;
 use JSON qw/decode_json/;
+use utf8;
 use strict;
 use warnings;
 
@@ -66,10 +68,15 @@ sub connect {
 }
 
 # Returns a list of suspects.  A suspect is a user that was potentially identified in a logged site.
+# @param usergroup_id the user group to search for
+#
 #  [
 #        {
 #            userid,
 #            user,
+#            usergroup_id,
+#            usergroup_name,
+#            usergroup_label,
 #            log   => [
 #                {
 #                    host,
@@ -83,22 +90,23 @@ sub connect {
 #            ]
 #        }
 #  ]
-sub getSuspects {
-    my $self     = shift;
-    my @suspects = ();
+sub getSuspectsForGroup {
+    my $self      = shift;
+    my $usergroup = shift;
+    my @suspects  = ();
     my $sql =
-qq(select distinct saya_users.userid, saya_users.user from saya_users inner join saya_suspects on saya_users.ip = saya_suspects.ip order by saya_users.user;);
+qq(select distinct saya_users.userid, saya_users.user from saya_users inner join saya_suspects on saya_users.ip = saya_suspects.ip where saya_users.usergroup_id = ? order by saya_users.user;);
     my $sql2 =
-qq(select distinct saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,saya_log.ip,saya_log.probe from saya_log inner join saya_users on saya_users.ip = saya_log.ip where saya_users.userid=? order by saya_log.host, saya_log.ip;);
+qq(select distinct saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,saya_log.ip,saya_log.probe from saya_log inner join saya_users on saya_users.ip = saya_log.ip where saya_users.userid=? and saya_users.usergroup_id=? and not saya_log.host in (select host from saya_hostsignore where saya_hostsignore.usergroup_id=?) order by saya_log.host, saya_log.ip;);
     my $row;
     my $sth  = $$self{"_dbh"}->prepare($sql);
     my $sth2 = $$self{"_dbh"}->prepare($sql2);
-    $sth->execute();
+    $sth->execute($usergroup);
 
     while ( $row = $sth->fetchrow_arrayref() ) {
         my @list = ();
         my $row2;
-        $sth2->execute( @$row[0] );
+        $sth2->execute( @$row[0], $usergroup, $usergroup );
         while ( $row2 = $sth2->fetchrow_arrayref() ) {
             push(
                 @list,
@@ -127,7 +135,143 @@ qq(select distinct saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,sa
     return \@suspects;
 }
 
+# Returns a list of suspects.  A suspect is a user that was potentially identified in a logged site.
+# @param usergroups optional array of usergroups to search for
+#
+#  [
+#        {
+#            group_id,
+#            group_name,
+#            group_label,
+#            {
+#                userid,
+#                user,
+#                log   => [
+#                    {
+#                        host,
+#                        referer,
+#                        last,
+#                        hits,
+#                        probe,
+#                        ip
+#                    }
+#                    ...
+#                ]
+#            }
+#        }
+#  ]
+sub getSuspects {
+    my $self       = shift;
+    my $usergroups = shift;
+    my @suspects   = ();
+    my $grpsql     = qq(select id, name, label from saya_usergroups);
+    if ($usergroups) {
+        $grpsql .= " where id in (" . join( ",", @$usergroups ) . ")";
+    }
+    my $sth = $$self{"_dbh"}->prepare($grpsql);
+    $sth->execute();
+
+    while ( my $row = $sth->fetchrow_arrayref() ) {
+        my $r = $self->getSuspectsForGroup( $$row[0] );
+        if ( scalar(@$r) > 0 ) {
+            push(
+                @suspects,
+                {
+                    group_id    => $$row[0],
+                    group_name  => $$row[1],
+                    group_label => $$row[2],
+                    users       => $r
+                }
+            );
+        }
+    }
+
+    $sth->finish();
+
+    return \@suspects;
+}
+
+# Adds a new user record
+# @param usergrou the name for the user group
+# @param userid  name unique to the user group
+# @param ip IP address last used
+# @param username  name name used for the user in the UI
+# @return undef on success, error message otherwise
+#
+sub addUserEntry {
+    my $self      = shift;
+    my $usergroup = shift;
+    my $userid    = "" . shift;
+    my $ip        = shift;
+    my $username  = shift;
+    my $sql       = qq(select id from saya_usergroups where name=?;);
+    my $sth       = $$self{"_dbh"}->prepare($sql);
+    $sth->execute($usergroup);
+    my $row = $sth->fetchrow_arrayref();
+    $sth->finish();
+    return "Invalid user group." if ( !$row );
+    my $ugid = $$row[0];
+    my $updatesql =
+qq(update saya_users set last=date(), user=? where ip=? and userid=? and usergroup_id=?;);
+    my $rv =
+      $$self{"_dbh"}->do( $updatesql, undef, $username, $ip, $userid, $ugid );
+
+    if ( $rv < 0 ) {
+        return $DBI::errstr;
+    }
+    elsif ( $rv == 0 ) {
+        my $insertsql =
+qq(insert into saya_users (usergroup_id, userid, ip,user,last) values (?,?,?,?,date()););
+        $$self{"_dbh"}->do( $insertsql, undef, $ugid, $userid, $ip, $username );
+    }
+    return undef;
+}
+
+# Imports a CSV list of users and IP addresses from a CSV file handle.
+#
+#    user id,user name,ip address
+#
+# @param usergroup name of the associated user group
+# @param filehandle the file handle to read from
+# @return undef on success, error message otherwise
+#
+sub importUsersFromCSVHandle {
+    my $self      = shift;
+    my $usergroup = shift;
+    my $fh        = shift;
+    my $csv       = Text::CSV->new( { binary => 1 } );
+    while ( my $e = $csv->getline($fh) ) {
+        if ( scalar(@$e) > 2 && @$e[2] =~ m/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/ ) {
+            my $rsp = $self->addUserEntry( $usergroup, $$e[0], $$e[2], $$e[1] );
+            return $rsp if ($rsp);
+        }
+    }
+    return undef;
+}
+
+# Imports a CSV list of users and IP addresses from a CSV file.
+#
+#  Format: (no header row)
+#    user id,user name,ip address
+#
+# @param usergroup name of the associated user group
+# @param filename path of the input CSV file
+# @return undef on success, error message otherwise
+#
+sub importUsersFromCSV {
+    my $self      = shift;
+    my $usergroup = shift;
+    my $filename  = shift;
+    open my $fh, "<:encoding(utf8)", $filename
+      or return "Cannot open $filename: $!";
+    my $rsp = $self->importUsersFromCSVHandle( $usergroup, $fh );
+    close($fh);
+    return $rsp;
+}
+
 # Returns duplicate IP usage
+# @param usergroups optional array of usergroups to search for
+#
 #  [
 #        {
 #            ip,
@@ -136,20 +280,35 @@ qq(select distinct saya_log.host,saya_log.referer,saya_log.last,saya_log.hits,sa
 #                    last,
 #                    userid,
 #                    user
+#                    usergroup_id,
+#                    usergroup_name,
+#                    usergroup_label
 #                }
 #                ...
 #            ]
 #        }
 #  ]
 sub getSharedIPs {
-    my $self = shift;
+    my $self       = shift;
+    my $usergroups = shift;
+
+    my $grpsql = "";
+    if ($usergroups) {
+        $grpsql .=
+          " and saya_users.usergroup_id in (" . join( ",", @$usergroups ) . ")";
+    }
 
     # Report on duplicate IP usage
     my @dups = ();
-    my $sql =
-qq(select ip from saya_users group by ip having count(*) > 1 order by ip;);
+    my $sql  = qq(select saya_users.ip from saya_users);
+    if ($usergroups) {
+        $sql .= " where saya_users.usergroup_id in ("
+          . join( ",", @$usergroups ) . ")";
+    }
+    $sql .=
+      qq( group by saya_users.ip having count(*) > 1 order by saya_users.ip;);
     my $sql2 =
-      qq(select userid, user, last from saya_users where ip=? order by user;);
+qq(select saya_users.userid, saya_users.user, saya_users.last, saya_users.usergroup_id, saya_usergroups.name, saya_usergroups.label from saya_users inner join saya_usergroups on saya_usergroups.id = saya_users.usergroup_id where ip=? $grpsql order by user;);
     my $row;
     my $sth  = $$self{"_dbh"}->prepare($sql);
     my $sth2 = $$self{"_dbh"}->prepare($sql2);
@@ -163,9 +322,12 @@ qq(select ip from saya_users group by ip having count(*) > 1 order by ip;);
             push(
                 @list,
                 {
-                    last   => @$row2[2],
-                    userid => @$row2[0],
-                    user   => @$row2[1]
+                    last        => @$row2[2],
+                    group_id    => @$row2[3],
+                    group_name  => @$row2[4],
+                    group_label => @$row2[5],
+                    userid      => @$row2[0],
+                    user        => @$row2[1]
                 }
             );
         }
@@ -244,8 +406,8 @@ qq(select hostname, loc, org, city, region, country, postal, phone from saya_ipi
 qq(insert into saya_ipinfo (ip, hostname, loc, org, city, region, country, postal, phone, created) values (?,?,?,?,?,?,?,?,?,datetime()););
         my $sth2 = $$self{"_dbh"}->prepare($sql2);
         $sth2->execute(
-            $ip,               $$data{"hostname"},
-            $$data{"loc"},     $$data{"org"},     $$data{"city"},  $$data{"region"},
+            $ip,               $$data{"hostname"}, $$data{"loc"},
+            $$data{"org"},     $$data{"city"},     $$data{"region"},
             $$data{"country"}, $$data{"postal"},   $$data{"phone"}
         );
         $sth2->finish();
@@ -290,12 +452,21 @@ qq(delete from saya_users where last < date('now','-$$self{maxUserIPAge} day');)
 # Updates the suspects table with current information.
 sub updateSuspects {
     my $self = shift;
-
     $$self{"_dbh"}->do(qq(delete from saya_suspects;));
 
-    $$self{"_dbh"}->do(
-qq(insert into saya_suspects select distinct saya_users.ip from saya_users inner join saya_log on saya_users.ip = saya_log.ip;)
-    );
+    my $sth = $$self{"_dbh"}->prepare(qq(select id from saya_usergroups;));
+    $sth->execute();
+    my $usergroup_row;
+    while ( $usergroup_row = $sth->fetchrow_arrayref() ) {
+        my $sth2 =
+          $$self{"_dbh"}->prepare(
+qq(insert into saya_suspects (usergroup_id, ip) select distinct ?, saya_users.ip from saya_users inner join saya_log on saya_users.ip = saya_log.ip where saya_users.usergroup_id=? and not saya_log.host in (select host from saya_hostsignore where saya_hostsignore.usergroup_id=?);)
+          );
+        $sth2->execute( $$usergroup_row[0], $$usergroup_row[0],
+            $$usergroup_row[0] );
+        $sth2->finish();
+    }
+    $sth->finish();
 
 }
 
@@ -311,6 +482,75 @@ sub isValidHost {
       $$self{"_dbh"}->prepare(qq(select 1 from saya_nolog where host=?;));
     $sth->execute($host);
     my $rtn = $sth->fetchrow_arrayref() ? 0 : 1;
+    $sth->finish();
+    return $rtn;
+}
+
+# Returns the user groups information by key.
+#
+# @param user groups the user groups name
+# @return info, undef otherwise
+#
+#        {
+#            id,
+#            name,
+#            label
+#        }
+sub getUserGroup {
+    my $self = shift;
+    my $name = shift;
+    return undef if ( !defined($name) );
+    my $sth =
+      $$self{"_dbh"}
+      ->prepare(qq(select id, name, label from saya_usergroups where name=?;));
+    $sth->execute($name);
+    my $row = $sth->fetchrow_arrayref();
+    $sth->finish();
+    return undef if ( !$row );
+    my $rtn = {
+        id    => @$row[0],
+        name  => @$row[1],
+        label => @$row[2]
+    };
+    $sth->finish();
+    return $rtn;
+}
+
+# Returns the agent information by key.
+#
+# @param agent the agent name
+# @return info, undef otherwise
+#
+# {
+#    'name' => 'mastermind',
+#    'id' => 1,
+#    'usergroups' => [1,2]
+# }
+sub getAgent {
+    my $self = shift;
+    my $name = shift;
+    return undef if ( !defined($name) );
+    my $sth =
+      $$self{"_dbh"}
+      ->prepare(qq(select id, name from saya_agents where name=?;));
+    $sth->execute($name);
+    my $row = $sth->fetchrow_arrayref();
+    $sth->finish();
+    return undef if ( !$row );
+    my $rtn =
+      ( !$row )
+      ? undef
+      : {
+        id   => @$row[0],
+        name => @$row[1]
+      };
+    $sth =
+      $$self{"_dbh"}->prepare(
+        qq(select usergroup_id from saya_authorizedgroups where agent_id=?;));
+    $sth->execute( $$rtn{"id"} );
+    my @groups = ();
+    push( @groups, @$row[0] ) while ( $row = $sth->fetchrow_arrayref() );
+    $$rtn{"usergroups"} = \@groups;
     $sth->finish();
     return $rtn;
 }
