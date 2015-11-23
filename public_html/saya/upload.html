@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Saya User Uploader</title>
+
+<meta charset="utf-8">
+<link rel="icon" href="assets/favicon.png">
+<link href='https://fonts.googleapis.com/css?family=Fredericka+the+Great' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css">
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/document.css">
+<link rel="stylesheet" href="3p/gridx/resources/claro/Gridx.css">
+<link rel="stylesheet" href="css/saya.css">
+<link rel="stylesheet" href="css/upload.css">
+
+<script>
+var basePath = window.location.href;
+basePath = basePath.substring(0, basePath.lastIndexOf("/"));
+dojoConfig = {
+    async: true,
+    debug: false,
+    parseOnLoad: false,
+    dojoBlankHtmlUrl: basePath + '/assets/blank.html',
+    packages: [{
+        name: 'saya',
+        location: basePath + '/js'
+    }, {
+        name: 'gridx',
+        location: basePath + '/3p/gridx'
+    }, {
+        name: '3p',
+        location: basePath + '/3p'
+    }]
+};
+</script>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
+
+<script src="js/upload.js"></script>
+
+</head>
+<body class="claro">
+
+ <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="gutters:true, liveSplitters:false" id="borderContainer">
+
+ <!-- TOP Container -->
+ <div id="divBanner" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'top'">
+  <div ondblclick="location='https://github.com/sunsetbrew/saya'"  onclick="location='index.html'" id="divLogo"> </div>
+  <div id="divTitle"> Saya Uploader </div>
+ </div>
+
+  <div  class="sayaContentPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:true, region:'leading'" id="content" style="width: 100%; text-align:left; overflow:auto;">
+   <form method="post" action="cgi/upload.pl" id="myForm" enctype="multipart/form-data" >
+   <div id="divForm">
+     <div class="about">Upload User Database</div><br />
+     <table>
+     <tr>
+     <th>User Group</th>
+     <td><select name="usergroup" id="usergroup" data-dojo-type="dijit/form/Select">
+     </select></td>
+     </tr>
+     <tr>
+     <th>CSV File</th>
+     <td><input name="file" data-dojo-props="multiple:false,label:'Browse'" type="file" data-dojo-type="dojox.form.Uploader" label="Select input file" id="uploader" /></td>
+     </tr>
+     <tr>
+     <td colspan="2" class="tdSubmit"><input type="button" id="submit" label="Submit" data-dojo-type="dijit.form.Button" /></td>
+     </tr>
+     </table>
+      <br />
+   </div>
+   </form>
+  </div>
+
+ <div id="divSignature" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:false, region:'bottom'">
+  Powered by Saya, Anti-Spy for Guilds.
+ </div>
+
+ </div>
+
+  <div id="flag">Flag!</div>
+</body>
+</html>

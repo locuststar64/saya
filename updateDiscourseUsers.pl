@@ -46,23 +46,16 @@ sub saya_addUserEntry {
     my $ip       = shift;
     my $username = shift;
     my $updatesql =
-      qq(update saya_users set last=date(), user=? where ip=? and userid=?;);
-    my $rv = $sayaDbh->do( $updatesql, undef, $username, $ip,  $userid);
+      qq(update saya_users set last=date(), user=? where ip=? and userid=? and usergroup_id=?;);
+    my $rv = $sayaDbh->do( $updatesql, undef, $username, $ip,  $userid, 1);
     if ( $rv < 0 ) {
         print $DBI::errstr;
     }
     elsif ( $rv == 0 ) {
         my $insertsql =
-qq(insert into saya_users (userid, ip,user,last) values (?,?,?,date()););
-        $sayaDbh->do( $insertsql, undef, $userid, $ip, $username );
+qq(insert into saya_users (usergroup_id, userid, ip,user,last) values (?,?,?,?,date()););
+        $sayaDbh->do( $insertsql, undef, 1, $userid, $ip, $username );
     }
-}
-
-sub saya_clearOldUserEntries {
-    my $maxAge = $$config{"maxUserIPAge"};
-    $sayaDbh->do(
-        qq(delete from saya_users where last < date('now','-$maxAge day');))
-      if ($maxAge);
 }
 
 sub updateDiscourseUsers {
@@ -78,7 +71,6 @@ qq(select id, username, ip_address from users where not ip_address is null and (
     $sth->finish();
 }
 
-saya_clearOldUserEntries();
 updateDiscourseUsers();
 
 $forumDbh->disconnect();

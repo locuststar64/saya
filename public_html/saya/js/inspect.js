@@ -82,6 +82,15 @@ require([
     };
 
     var createTabContainer = function(data) {
+        if (!data.agent || !data.agent.usergroups || data.agent.usergroups.length == 0) {
+		var panel = new ContentPane({
+         		title: "Access Restricted",
+			content: '<div class="errmsg">You are not authorized to view this content.</div>'
+
+   		 });
+		wjt.content.addChild(panel);
+	    return;
+        }
 	var groups = {};
         for (var i = 0; i < data.suspects.length; i++) {
 	    var group = data.suspects[i];

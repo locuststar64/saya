@@ -25,6 +25,7 @@ use strict;
 use utf8;
 use warnings;
 use Encode q/encode_utf8/;
+use Data::Dumper;
 
 my $config;
 
@@ -45,10 +46,6 @@ use JSON qw/encode_json/;
 my $saya = Saya->new($config);
 die $_ if ( $saya->connect() );
 
-my $suspects  = [];
-my $sharedIPs = [];
-my %probes    = ();
-my %ips       = ();
 my $agent = {};
 
 sub sendData {
@@ -57,61 +54,21 @@ sub sendData {
     $agent = $saya->getAgent( $ENV{'REMOTE_USER'} );
     return if ( !$agent or !scalar( @{ $$agent{"usergroups"} } ) );
 
-       #$$agent{"usergroups"} = [];
+    #$$agent{"usergroups"} = [2]; # XXX
 
-    $saya->updateSuspects( );
-    $suspects  = $saya->getSuspects( $$agent{"usergroups"} );
-    $sharedIPs = $saya->getSharedIPs( $$agent{"usergroups"} );
-
-    # get ip info
-    my %ipset    = ();
-    my %probeset = ();
-    my $item;
-    my $ip;
-    foreach $item (@$suspects) {
-        my $usr;
-        foreach $usr ( @{ $$item{"users"} } ) {
-           my $log;
-           foreach $log ( @{ $$usr{"log"} } ) {
-               $ipset{ $$log{"ip"} }       = 1;
-               $probeset{ $$log{"probe"} } = 1;
-           }
-        }
+    my @grp = ();
+    foreach my $id ( @{ $$agent{"usergroups"} } ) {
+        my $info = $saya->getUserGroupById($id);
+        push( @grp, $info ) if ($info);
     }
-    foreach $item (@$sharedIPs) {
-        $ipset{ $$item{"ip"} } = 1;
-    }
-
-    my @keys = keys(%ipset);
-    foreach $ip (@keys) {
-        my $entry = $saya->getIPInfo($ip);
-        $ips{$ip} = $entry if ($entry);
-    }
-
-    @keys = keys(%probeset);
-    my $probe;
-    foreach $probe (@keys) {
-        my $entry = $saya->getProbeById($probe);
-        if ($entry) {
-            $$entry{"key"} = sprintf( "%X", $$entry{"key"} );
-            $probes{$probe} = $entry;
-        }
-    }
+    $$agent{"usergroups"} = \@grp;
 }
 
 sendData();
 
 $saya->disconnect();
 
-my $data = {
-    agent => $agent,
-    suspects => $suspects,
-    dupips   => $sharedIPs,
-    probes   => \%probes,
-    ips      => \%ips
-};
-
-my $json = encode_json($data);
+my $json = encode_json($agent);
 
 print "Content-type: application/json\r\n";
 print "Content-Length: " . length( encode_utf8 $json) . "\r\n";

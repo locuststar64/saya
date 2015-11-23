@@ -23,6 +23,7 @@ For information on how it works, see the [white paper]( https://github.com/sunse
 - Perl with DBD::SQLite installed.
 - Perl with HTTP:Tiny installed.
 - Perl with Text:CSV installed.
+- Perl with CGI installed.
 - Perl with JSON installed.
 
 ### If using Discourse

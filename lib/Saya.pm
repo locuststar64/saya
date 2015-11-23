@@ -496,6 +496,37 @@ sub isValidHost {
 #            name,
 #            label
 #        }
+sub getUserGroupById {
+    my $self = shift;
+    my $id = shift;
+    return undef if ( !defined($id) );
+    my $sth =
+      $$self{"_dbh"}
+      ->prepare(qq(select id, name, label from saya_usergroups where id=?;));
+    $sth->execute($id);
+    my $row = $sth->fetchrow_arrayref();
+    $sth->finish();
+    return undef if ( !$row );
+    my $rtn = {
+        id    => @$row[0],
+        name  => @$row[1],
+        label => @$row[2]
+    };
+    $sth->finish();
+    return $rtn;
+}
+
+
+# Returns the user groups information by key.
+#
+# @param user groups the user groups name
+# @return info, undef otherwise
+#
+#        {
+#            id,
+#            name,
+#            label
+#        }
 sub getUserGroup {
     my $self = shift;
     my $name = shift;

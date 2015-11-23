@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -CS
 # The MIT License (MIT)
 #
 # Copyright (c) 2015 No Face Press, LLC
@@ -22,7 +22,11 @@
 # SOFTWARE.
 
 use strict;
+use utf8;
 use warnings;
+use CGI qw(:standard);
+use Data::Dumper;
+use Encode q/encode_utf8/;
 
 my $config;
 
@@ -42,38 +46,57 @@ use JSON qw/encode_json/;
 
 my $saya = Saya->new($config);
 die $_ if ( $saya->connect() );
-my $suspects  = $saya->getSuspects();
-my $sharedIPs = $saya->getSharedIPs();
-$saya->disconnect();
 
-my $user;
-my $group;
-my $log;
-foreach $group (@$suspects) {
-foreach $user (@{$$group{"users"}}) {
-    printf( "USER:  %s (%s)\n", $$user{"user"}, $$user{"userid"} );
-    printf( "GROUP: %s (%s)\n\n", $$group{"group_label"}, $$group{"group_name"} );
-    printf( "  %-15s %-19s %-4s %-5s %-28s %s\n",
-        "IP", "DATE", "HITS", "PROBE", "HOST", "REFERER" );
-    foreach $log ( @{ $$user{"log"} } ) {
-        printf(
-            "  %-15s %-19s %-4s %-5d %-28s %s\n",
-            $$log{"ip"},    $$log{"last"}, $$log{"hits"},
-            $$log{"probe"}, $$log{"host"}, $$log{"referer"}
-        );
+my $usergroup = param("usergroup");
+my @filenames = param("file");
+my @handles   = upload("file");
+
+if ( $#filenames == -1 ) {
+    my $file = 1;
+    for ( my $index = 0 ; $file ; $index++ ) {
+        $file = upload( "file" . $index );
+        if ( $file && length($file) ) {
+            push( @filenames, $file );
+            push( @handles,   $file );
+        }
     }
-    printf("\n\n");
-}
 }
 
-my $ip;
-foreach $ip (@$sharedIPs) {
-    printf( "SHARED IP: %s\n\n", $$ip{"ip"} );
-    printf( "  %-15s %-24s %-10s %s\n", "DATE", "GROUP", "USERID", "USER" );
-    foreach $user ( @{ $$ip{"users"} } ) {
-        printf( "  %-15s %-24s %-10s %s\n",
-            $$user{"last"}, $$user{"group_label"}, $$user{"userid"}, $$user{"user"} );
+sub checkUser {
+
+    return 0 if ( !exists $ENV{'REMOTE_USER'} );
+    my $agent = $saya->getAgent( $ENV{'REMOTE_USER'} );
+    return 0 if ( !$agent or !scalar( @{ $$agent{"usergroups"} } ) );
+
+    #       $$agent{"usergroups"} = [2]; # XXX
+
+    my @grp = ();
+    foreach my $id ( @{ $$agent{"usergroups"} } ) {
+        my $info = $saya->getUserGroupById($id);
+        return 1 if ( $info && $$info{"name"} eq $usergroup );
     }
-    printf("\n\n");
+    return 0;
 }
+
+my $response = "Import failed";
+
+if ( checkUser() == 1 ) {
+    foreach my $handle (@handles) {
+        open OUT, ">/tmp/x";
+        print OUT $_ while (<$handle>);
+        close(OUT);
+        $saya->importUsersFromCSV( $usergroup, "/tmp/x" );
+        $response = "Import complete";
+    }
+}
+else {
+    $response = "Not Authorized";
+}
+
+print "Content-type: text/html\r\n";
+print "Content-Length: " . length( encode_utf8 $response) . "\r\n";
+print "\r\n";
+print "$response\n";
+
+exit 0;
 

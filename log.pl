@@ -67,8 +67,10 @@ exit(0) if ( $$probeInfo{"isactive"} == 0 );
 
 my $ref = $ENV{'HTTP_REFERER'};
 
-my $ip = $ENV{'REMOTE_HOST'};
-$ip = $ENV{'HTTP_X_REAL_IP'} if ( !$ip );
+my $ip = undef;
+$ip = $ENV{'HTTP_X_REAL_IP'} if ( exists $ENV{'HTTP_X_REAL_IP'} );
+$ip = $ENV{'HTTP_X_FORWARDED_FOR'} if ( !$ip && exists $ENV{'HTTP_X_FORWARDED_FOR'} );
+$ip = $ENV{'REMOTE_ADDR'} if ( !$ip && exists $ENV{'REMOTE_ADDR'} );
 
 exit(0) if ( !$ref || !$ip );
 
